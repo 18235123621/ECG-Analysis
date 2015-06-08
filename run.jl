@@ -1,4 +1,14 @@
+using Gtk
 using Gtk.ShortNames
+using PyPlot # http://matplotlib.org/api/pyplot_summary.html
+
+include("modules/ECGInput.jl")
+include("modules/Baseline.jl")
+using ECGInput
+using Baseline
+
+pygui(false)
+!isdefined(:MainWindow) || destroy(MainWindow)
 
 println("\n\n#############################################");
 println("#");
@@ -6,45 +16,142 @@ println("# Przetwarzanie sygnałów 2015");
 println("#");
 println("#############################################\n");
 
-# GtkWindowLeaf(name="", parent, width-request=-1, height-request=-1, visible=TRUE, sensitive=TRUE, app-paintable=FALSE, can-focus=FALSE, has-focus=FALSE, is-focus=FALSE, can-default=FALSE, has-default=FALSE, receives-default=FALSE, composite-child=FALSE, style, events=0, no-show-all=FALSE, has-tooltip=FALSE, tooltip-markup=NULL, tooltip-text=NULL, window, double-buffered=TRUE, halign=GTK_ALIGN_FILL, valign=GTK_ALIGN_FILL, margin-left=0, margin-right=0, margin-top=0, margin-bottom=0, margin=0, hexpand=FALSE, vexpand=FALSE, hexpand-set=FALSE, vexpand-set=FALSE, expand=FALSE, border-width=0, resize-mode=GTK_RESIZE_QUEUE, child, type=GTK_WINDOW_TOPLEVEL, title="My window", role=NULL, resizable=TRUE, modal=FALSE, window-position=GTK_WIN_POS_NONE, default-width=-1, default-height=-1, destroy-with-parent=FALSE, hide-titlebar-when-maximized=FALSE, icon, icon-name=NULL, screen, type-hint=GDK_WINDOW_TYPE_HINT_NORMAL, skip-taskbar-hint=FALSE, skip-pager-hint=FALSE, urgency-hint=FALSE, accept-focus=TRUE, focus-on-map=TRUE, decorated=TRUE, deletable=TRUE, gravity=GDK_GRAVITY_NORTH_WEST, transient-for, attached-to, opacity=1.000000, has-resize-grip=TRUE, resize-grip-visible=TRUE, application, ubuntu-no-proxy=FALSE, is-active=FALSE, has-toplevel-focus=FALSE, startup-id, mnemonics-visible=TRUE, focus-visible=TRUE, )
+###################################
+#
+# PODSTAWOWE FUNKCJE - CORE
+#
+###################################
 
-MainWindow = @Window("Przetwarzanie sygnałów EKG", 950, 600, false, true)
+function reload_plot(wykres, arg_data, page=0, items_per_page=5000)
 
-ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
+    if page < 0
+        page = 0
+    end
 
-setproperty!(MainWindow, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
-# ccall((:gtk_window_set_position,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,Main.Base.int32(3)) # to samo co wyzej
+    figure(1, figsize=[9, 2], dpi=100, facecolor="#f2f1f0")
 
-g = @Grid()   # gtk3-only (use @Table() for gtk2)
+    xstart = page * items_per_page
+    xend = xstart + items_per_page
+    if xstart == 0
+        xstart = 1
+    end
 
-setproperty!(g, :column_spacing, 15)  # introduce a 15-pixel gap between columns
+    if length(arg_data) == 0
+        xstart = 1
+        xend = 0
+    elseif xstart > length(arg_data)
+        page = floor(length(arg_data) / items_per_page)
+        xstart = page * items_per_page
+        if xstart == 0
+            xstart = 1
+        end
+        xend = length(arg_data)
+    elseif xend > length(arg_data)
+        xend = length(arg_data)
+    end
 
-file = @MenuItem("_Plik")
-    filemenu = @Menu(file)
-    open_ = @MenuItem("Otwórz")
-    push!(filemenu, open_)
-    push!(filemenu, @SeparatorMenuItem())
-    quit = @MenuItem("Zakończ")
-    push!(filemenu, quit)
-mb = @MenuBar()
-push!(mb, file)
+    global current_page
+    current_page = page
 
+    x = [xstart:xend]
 
-id2 = signal_connect(open_, :activate) do widget
-	println("otwieram")
+    println("Generuje wykres z przedzialu $xstart:$xend");
+
+    plot(x,arg_data[xstart:xend])
+    savefig("wykres.jpg",format="jpg",bbox_inches="tight",pad_inches=0,facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
 end
+
+###################################
+#
+# INICJALIZACJA ZMIENNYCH ORAZ WCZYTYWANIE GUI Z PLIKU
+#
+###################################
+
+current_page = 0
+items_per_page = 2000
+
+builder = Gtk.GtkBuilderLeaf(filename="gui.glade");
+MainWindow = GAccessor.object(builder,"mainwindow");
+window_change_resolution = GAccessor.object(builder,"window_change_resolution");
+wykres = GAccessor.object(builder,"wykres")
+data = []
+reload_plot(wykres, data, 0, items_per_page)
+
+# ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
+setproperty!(MainWindow, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
+setproperty!(window_change_resolution, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
+
+###################################
+#
+# OBSLUGA INTERAKCJI Z GUI
+#
+###################################
+
+# MENU Wczytaj sygnał
+sig_menu_file_open = signal_connect(GAccessor.object(builder,"menu_file_open"), :activate) do widget
+    global data
+    sig_file = open_dialog("Wczytaj plik z sygnałem EKG"; parent = MainWindow)
+    data = readdlm(sig_file)
+    reload_plot(wykres, data, 0, items_per_page)
+end
+
+# MENU Zakończ
+sig_menu_file_exit = signal_connect(GAccessor.object(builder,"menu_file_exit"), :activate) do widget
+    println("Zakończono działanie programu.")
+    exit()
+end
+
+# Suwak w lewo
+sig_move_left = signal_connect(GAccessor.object(builder,"move_left"), :clicked) do widget
+    reload_plot(wykres, data, current_page-1, items_per_page)
+end
+
+# Suwak w prawo
+sig_move_right = signal_connect(GAccessor.object(builder,"move_right"), :clicked) do widget
+    reload_plot(wykres, data, current_page+1, items_per_page)
+end
+
+# Zmiana rozdzielczosci wykresu
+sig_menu_plot_change_resolution = signal_connect(GAccessor.object(builder,"menu_plot_change_resolution"), :activate) do widget
+    ccall((:gtk_widget_show,Gtk.libgtk),Void,(Ptr{Gtk.GObject},),window_change_resolution)
+    setproperty!(GAccessor.object(builder,"entry_resolution"), "text", items_per_page)
+end
+
+sig_button_save_resolution = signal_connect(GAccessor.object(builder,"button_save_resolution"), :clicked) do widget
+    global data
+    global items_per_page
+    new_items_per_page = getproperty(GAccessor.object(builder,"entry_resolution"), :text, String)
+    if new_items_per_page != ""
+        items_per_page = parse(Int,new_items_per_page)
+    end
+    ccall((:gtk_widget_hide,Gtk.libgtk),Void,(Ptr{Gtk.GObject},),window_change_resolution)
+    println("Nowa rozdzielczosc wykresu: $items_per_page probek")
+    reload_plot(wykres, data, 0, items_per_page)
+end
+
 #signal_handler_disconnect(open_, id2)
 
 
-g[1:90,1] = mb
-push!(MainWindow, g)
+###################################
+#
+# WYSWIETLANIE GUI
+#
+###################################
 
 showall(MainWindow)
+showall(window_change_resolution)
+ccall((:gtk_widget_hide,Gtk.libgtk),Void,(Ptr{Gtk.GObject},),window_change_resolution)
 
 if !isinteractive()
     c = Condition()
     signal_connect(MainWindow, :destroy) do widget
         notify(c)
     end
+    signal_connect(window_change_resolution, :destroy) do widget
+        notify(c)
+    end
     wait(c)
 end
+

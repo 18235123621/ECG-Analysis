@@ -13,8 +13,8 @@ type Signal
 end
 
 function loadsignal(record::String, signal::Int=0, time::Any="e")
-    data = readcsv(IOBuffer(readall(`rdsamp -r $record -c -s $signal -t $time`)), Int)
-    meta = readdlm(IOBuffer(readall(`wfdbdesc $record`)), ':', String)
+    data = readcsv(IOBuffer(readall(`LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH wfdb/rdsamp -r $record -c -s $signal -t $time`)), Int)
+    meta = readdlm(IOBuffer(readall(`LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH wfdb/wfdbdesc $record`)), ':', String)
     metadict = Dict(meta[:,1], meta[:,2])
     Signal(data, metadict, Dict())
 end
