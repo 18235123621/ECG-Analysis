@@ -1,0 +1,29 @@
+ECGInput
+========
+
+Moduł do ładowania/zapisywania sygnałów EKG z bazy PhysioBank oraz z/do plików CSV. Do poporawnej pracy wymagana jest bibloteka WFDB i wchodzące w jej skład programy rdsamp i wfdbdesc. Więcej o nich pod http://www.physionet.org/physiotools/wag/intro.htm
+
+ECGInput zwraca obiekt Signal posiadający trzy własności:
+- data - wektor próbek o wartościach typu Float32
+- meta - słownik metadanych, tj. częstotl. próbk.
+- anno - słownik adnotacji o formacie {nr_próbki => symbol}
+
+Oprócz tego dostępne są metody:
+- loadsignal(record, signal=0, time="e") - ładuje sygnał z rekordu bazy PhysioBank o nazwie record (np. "aami-ec13/aami3a") i numerze signal oraz o długości time w sekundach (lub "e" dla pełnej długości sygnału). Więcej o formatach atrybutów pod http://physionet.org/physiotools/wag/intro.htm#record
+- opensignal(filename) - otwiera pliki filename_{data,meta,anno}.csv i zwraca obiekt Signal w nich przechowywany
+- savesignal(filename, signal) - zapisuje signal do trzech plików filename_{data,meta,anno}.csv
+
+Przykładowe metadane:
+	Starting time: not specified
+	Length:     0:59.835 (43081 sample intervals)
+	Sampling frequency: 720 Hz
+	 File: aami3a.dat
+	 Description: ECG
+	 Gain: 130 adu/mV
+	 Initial value: 2072
+	 Storage format: 16
+	 I/O: can be unbuffered
+	 ADC resolution: 12 bits
+	 ADC zero: 2048
+	 Baseline: 2048
+	 Checksum: -11941
