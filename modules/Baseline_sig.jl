@@ -1,12 +1,10 @@
 # Zmiana rozdzielczosci wykresu
-sig_baseline_execute = signal_connect(GAccessor.object(builder_baseline,"baseline_execute"), :clicked) do widget
+sig_baseline_execute = signal_connect(GAccessor.object(builder_main,"baseline_execute"), :clicked) do widget
 
     global data
 
-    baseline_type = getproperty(GAccessor.object(builder_baseline,"baseline_combobox_type"), :active, String)
+    baseline_type = getproperty(GAccessor.object(builder_main,"baseline_combobox_type"), :active, String)
     baseline_type = parse(Int,baseline_type);
-
-    hide_window(window_baseline)
 
     if baseline_type == 0
         data = Baseline.movingAverage(data)

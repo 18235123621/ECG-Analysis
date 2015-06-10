@@ -88,6 +88,15 @@ function show_window(win)
     ccall((:gtk_widget_show,Gtk.libgtk),Void,(Ptr{Gtk.GObject},),win)
 end
 
+function clear_workspace()
+    if hasparent(baseline_fixed)
+        delete!(modules, baseline_fixed)
+    end
+    if hasparent(r_peaks_fixed)
+        delete!(modules, r_peaks_fixed)
+    end
+end
+
 ######################################################################
 #
 # INICJALIZACJA PODSTAWOWYCH ZMIENNYCH
@@ -109,7 +118,6 @@ data = []
 ######################################################################
 
 builder_main = Gtk.GtkBuilderLeaf(filename="gui.glade");
-builder_baseline = Gtk.GtkBuilderLeaf(filename="modules/Baseline.glade");
 
 ######################################################################
 #
@@ -119,12 +127,15 @@ builder_baseline = Gtk.GtkBuilderLeaf(filename="modules/Baseline.glade");
 
 !isdefined(:MainWindow) || destroy(MainWindow)
 !isdefined(:window_change_resolution) || destroy(window_change_resolution)
-!isdefined(:window_baseline) || destroy(window_baseline)
 
 MainWindow = GAccessor.object(builder_main,"mainwindow");
+modules = GAccessor.object(builder_main,"modules")
 window_change_resolution = GAccessor.object(builder_main,"window_change_resolution");
-window_baseline = GAccessor.object(builder_baseline,"window_baseline");
 wykres = GAccessor.object(builder_main,"wykres")
+
+# Okna modulow
+baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
+r_peaks_fixed = GAccessor.object(builder_main,"r_peaks_fixed")
 
 reload_plot(wykres, data, 0, items_per_page)
 # ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
@@ -182,11 +193,15 @@ sig_button_save_resolution = signal_connect(GAccessor.object(builder_main,"butto
 end
 
 # Otwarcie okna Baseline
-sig_menu_processing_baseline = signal_connect(GAccessor.object(builder_main,"menu_processing_baseline"), :activate) do widget
-    show_window(window_baseline)
+sig_menu_baseline = signal_connect(GAccessor.object(builder_main,"menu_baseline"), :clicked) do widget
+    clear_workspace()
+    push!(modules, baseline_fixed)
 end
 
-#signal_handler_disconnect(open_, id2)
+sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_r_peaks"), :clicked) do widget
+    clear_workspace()
+    push!(modules, r_peaks_fixed)
+end
 
 include("modules/Baseline_sig.jl");
 
@@ -198,9 +213,9 @@ include("modules/Baseline_sig.jl");
 
 showall(MainWindow)
 showall(window_change_resolution)
-showall(window_baseline)
 hide_window(window_change_resolution)
-hide_window(window_baseline)
+
+push!(modules, baseline_fixed)
 
 if !isinteractive()
     c = Condition()

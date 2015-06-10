@@ -2,6 +2,115 @@
 <!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
+  <object class="GtkFixed" id="baseline_fixed">
+    <property name="width_request">100</property>
+    <property name="height_request">80</property>
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="label2">
+        <property name="width_request">50</property>
+        <property name="height_request">25</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Funkcja:</property>
+      </object>
+      <packing>
+        <property name="x">20</property>
+        <property name="y">20</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label3">
+        <property name="width_request">50</property>
+        <property name="height_request">25</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Częstotliwość próbkowania:</property>
+      </object>
+      <packing>
+        <property name="x">20</property>
+        <property name="y">60</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label4">
+        <property name="width_request">50</property>
+        <property name="height_request">25</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Częstotliwość odcięcia:</property>
+      </object>
+      <packing>
+        <property name="x">20</property>
+        <property name="y">100</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="baseline_execute">
+        <property name="label" translatable="yes">Wykonaj</property>
+        <property name="width_request">200</property>
+        <property name="height_request">40</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="resize_mode">immediate</property>
+        <property name="xalign">0.52999997138977051</property>
+      </object>
+      <packing>
+        <property name="x">130</property>
+        <property name="y">150</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="baseline_entry_fs">
+        <property name="width_request">100</property>
+        <property name="height_request">25</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="width_chars">0</property>
+        <property name="text" translatable="yes">360</property>
+      </object>
+      <packing>
+        <property name="x">230</property>
+        <property name="y">60</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="baseline_entry_fc">
+        <property name="width_request">100</property>
+        <property name="height_request">25</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="width_chars">0</property>
+        <property name="text" translatable="yes">0.8</property>
+      </object>
+      <packing>
+        <property name="x">230</property>
+        <property name="y">100</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBoxText" id="baseline_combobox_type">
+        <property name="width_request">200</property>
+        <property name="height_request">20</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_right">20</property>
+        <property name="active">0</property>
+        <items>
+          <item id="0" translatable="yes">średnia krocząca</item>
+          <item id="1" translatable="yes">lms</item>
+          <item id="2" translatable="yes">butterworth</item>
+          <item id="3" translatable="yes">filtr savitzky-golay</item>
+        </items>
+      </object>
+      <packing>
+        <property name="x">230</property>
+        <property name="y">18</property>
+      </packing>
+    </child>
+  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -21,7 +130,7 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Przetwarzanie sygnałów EKG</property>
     <child>
-      <object class="GtkFixed" id="fixed1">
+      <object class="GtkFixed" id="window_fixed">
         <property name="height_request">700</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -92,28 +201,6 @@
                 </child>
               </object>
             </child>
-            <child>
-              <object class="GtkMenuItem" id="menu_processing">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Przetwarzanie sygnału</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="menu_processing_sub">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_processing_baseline">
-                        <property name="label" translatable="yes">Baseline</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="image">image4</property>
-                        <property name="use_stock">False</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
           </object>
         </child>
         <child>
@@ -161,13 +248,69 @@
             <property name="y">540</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkButton" id="menu_baseline">
+            <property name="label" translatable="yes">Filtracja sygnału</property>
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">10</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="menu_r_peaks">
+            <property name="label" translatable="yes">Detekcja załamka R</property>
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">140</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFixed" id="modules">
+            <property name="width_request">880</property>
+            <property name="height_request">400</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="x">5</property>
+            <property name="y">90</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="image4">
+  <object class="GtkFixed" id="r_peaks_fixed">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-missing-image</property>
+    <child>
+      <object class="GtkButton" id="button100">
+        <property name="label" translatable="yes">Przykladowy button</property>
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="margin_left">30</property>
+        <property name="margin_top">30</property>
+        <property name="resize_mode">queue</property>
+      </object>
+      <packing>
+        <property name="x">33</property>
+        <property name="y">29</property>
+      </packing>
+    </child>
   </object>
   <object class="GtkWindow" id="window_change_resolution">
     <property name="width_request">450</property>
