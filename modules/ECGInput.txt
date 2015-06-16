@@ -12,6 +12,15 @@ Oprócz tego dostępne są metody:
 - loadsignal(record, signal=0, time="e") - ładuje sygnał z rekordu bazy PhysioBank o nazwie record (np. "aami-ec13/aami3a") i numerze signal oraz o długości time w sekundach (lub "e" dla pełnej długości sygnału). Więcej o formatach atrybutów pod http://physionet.org/physiotools/wag/intro.htm#record
 - opensignal(filename) - otwiera pliki filename_{data,meta,anno}.csv i zwraca obiekt Signal w nich przechowywany
 - savesignal(filename, signal) - zapisuje signal do trzech plików filename_{data,meta,anno}.csv
+- getres(signal) - zwraca rozdzielczość próbkowania w bitach (max. wartość próbki to 2^res)
+- getfreq(signal) - zwraca częstotliwość próbkowania sygnału w Hz
+- getPonset(signal) - zwraca posortowany wektor próbek oznaczonych jako Ponset
+- getPend(signal) - zwraca posortowany wektor nrów próbek oznaczonych jako Pend
+- getQRSonset(signal) - zwraca posortowany wektor nrów próbek oznaczonych jako QRSonset
+- getQRSend(signal) - zwraca posortowany wektor nrów próbek oznaczonych jako QRSend
+- getR(signal) - zwraca posortowany wektor nrów próbek oznaczonych jako R
+
+Adnotacje powinny mieć jedną z wartości: "Ponset", "Pend", "QRSonset", "QRSend", "R". Do słownika można łątwo dodawać elementy używając składni: dict[key] = value. Należy pamiętać, że słownik przechowuje nieposortowane klucze, aby je posortować należy wykonać: sort(collect(dict)).
 
 Przykładowe metadane:
 	Starting time: not specified

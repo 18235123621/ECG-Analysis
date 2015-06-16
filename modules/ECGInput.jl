@@ -1,10 +1,10 @@
 module ECGInput
-#Version: 0.2
+#Version: 0.3
 #Requires: rdsamp, wfdbdesc from WFDB Apps
 #Loads a signal record of given name and optionally given signal number and duration
 #More info: http://www.physionet.org/physiotools/wag/intro.htm
 
-export Signal, loadsignal, opensignal, savesignal
+export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR
 
 type Signal
     data::Array{Float32, 1}
@@ -33,5 +33,19 @@ function savesignal(filename::String, signal::Signal)
     writecsv("$(filename)_meta.csv", signal.meta)
     writecsv("$(filename)_anno.csv", signal.anno)
 end
+
+getres(signal::Signal) = int(split(signal.meta["ADC resolution"])[1])
+
+getfreq(signal::Signal) = int(split(signal.meta["Sampling frequency"])[1])
+
+getPonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
+
+getPend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
+
+getQRSonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
+
+getQRSend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
+
+getR(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
 end
