@@ -5,11 +5,7 @@ println("# Przetwarzanie sygnałów 2015");
 println("#");
 println("#############################################\n");
 
-######################################################################
-#
 # LADOWANIE BIBLIOTEK
-#
-######################################################################
 
 # Pkg.add("Gtk")
 # Pkg.add("PyCall")
@@ -22,22 +18,20 @@ using PyPlot # http://matplotlib.org/api/pyplot_summary.html
 
 pygui(false)
 
-######################################################################
-#
 # LADOWANIE MODULOW DO PRZETWARZANIA SYGNALU
-#
-######################################################################
 
-include("modules/ECGInput.jl")
-include("modules/Baseline.jl")
+include("modules/ECGInput.jl") # Modul I/O
+include("modules/Baseline.jl") # Modul Baseline
 using ECGInput
 using Baseline
 
-######################################################################
-#
+# INICJALIZACJA PODSTAWOWYCH ZMIENNYCH GLOBALNYCH
+
+current_page = 0
+items_per_page = 2000
+data = []
+
 # PODSTAWOWE FUNKCJE - CORE
-#
-######################################################################
 
 function reload_plot(wykres, arg_data, page=0, items_per_page=5000)
 
@@ -97,33 +91,11 @@ function clear_workspace()
     end
 end
 
-######################################################################
-#
-# INICJALIZACJA PODSTAWOWYCH ZMIENNYCH
-#
-######################################################################
-
-current_page = 0
-items_per_page = 2000
-data = []
-
-######################################################################
-#
 # TWORZENIE BUILDEROW DLA WSZYSTKICH GUI
-#
-# Buildery są pomostami między Julią a GTK. Odnoszac sie do jakiegokolwiek
-# widgetu zazwyczaj potrzebne jest podanie buildera, z którego ten widget
-# zostal wygenerowany.
-#
-######################################################################
 
 builder_main = Gtk.GtkBuilderLeaf(filename="gui.glade");
 
-######################################################################
-#
 # TWORZENIE UCHWYTOW DO OKIEN ORAZ WIDGETOW
-#
-######################################################################
 
 !isdefined(:MainWindow) || destroy(MainWindow)
 !isdefined(:window_change_resolution) || destroy(window_change_resolution)
@@ -142,11 +114,7 @@ reload_plot(wykres, data, 0, items_per_page)
 setproperty!(MainWindow, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
 setproperty!(window_change_resolution, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
 
-######################################################################
-#
 # OBSLUGA INTERAKCJI Z GUI
-#
-######################################################################
 
 # MENU Wczytaj sygnał
 sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_file_open"), :activate) do widget
@@ -205,11 +173,7 @@ end
 
 include("modules/Baseline_sig.jl");
 
-######################################################################
-#
 # WYSWIETLANIE GUI
-#
-######################################################################
 
 showall(MainWindow)
 showall(window_change_resolution)
