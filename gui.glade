@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkFixed" id="baseline_fixed">
-    <property name="width_request">100</property>
-    <property name="height_request">80</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
@@ -114,19 +112,20 @@
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-missing-image</property>
+    <property name="stock">gtk-quit</property>
   </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-missing-image</property>
+    <property name="stock">gtk-open</property>
   </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-missing-image</property>
+    <property name="stock">gtk-fullscreen</property>
   </object>
   <object class="GtkWindow" id="mainwindow">
+    <property name="width_request">900</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Przetwarzanie sygnałów EKG</property>
     <child>
@@ -136,8 +135,6 @@
         <property name="can_focus">False</property>
         <child>
           <object class="GtkMenuBar" id="menubar1">
-            <property name="width_request">900</property>
-            <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">baseline</property>
@@ -152,11 +149,29 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
+                      <object class="GtkImageMenuItem" id="menu_record_load">
+                        <property name="label" translatable="yes">Załaduj rekord PhysioBank...</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="image">image4</property>
+                        <property name="use_stock">False</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="menu_file_open">
-                        <property name="label" translatable="yes">Wczytaj sygnał</property>
+                        <property name="label" translatable="yes">Otwórz sygnał z pliku...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="image">image2</property>
+                        <property name="use_stock">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menu_file_save">
+                        <property name="label" translatable="yes">Zapisz sygnał do pliku...</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="image">image5</property>
                         <property name="use_stock">False</property>
                       </object>
                     </child>
@@ -213,14 +228,14 @@
             <property name="pixbuf">wykres.jpg</property>
           </object>
           <packing>
-            <property name="x">55</property>
+            <property name="x">50</property>
             <property name="y">490</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton" id="move_left">
             <property name="label" translatable="yes">&lt;</property>
-            <property name="width_request">40</property>
+            <property name="width_request">30</property>
             <property name="height_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -229,14 +244,14 @@
             <property name="yalign">0.49000000953674316</property>
           </object>
           <packing>
-            <property name="x">15</property>
+            <property name="x">10</property>
             <property name="y">540</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton" id="move_right">
             <property name="label" translatable="yes">&gt;</property>
-            <property name="width_request">40</property>
+            <property name="width_request">30</property>
             <property name="height_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -244,35 +259,35 @@
             <property name="xalign">0.43999999761581421</property>
           </object>
           <packing>
-            <property name="x">850</property>
+            <property name="x">860</property>
             <property name="y">540</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton" id="menu_baseline">
-            <property name="label" translatable="yes">Filtracja sygnału</property>
-            <property name="width_request">100</property>
+            <property name="label" translatable="yes">ECG_BASELINE</property>
+            <property name="width_request">120</property>
             <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </object>
           <packing>
-            <property name="x">10</property>
+            <property name="x">90</property>
             <property name="y">40</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton" id="menu_r_peaks">
-            <property name="label" translatable="yes">Detekcja załamka R</property>
-            <property name="width_request">100</property>
+            <property name="label" translatable="yes">R_PEAKS</property>
+            <property name="width_request">120</property>
             <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </object>
           <packing>
-            <property name="x">140</property>
+            <property name="x">230</property>
             <property name="y">40</property>
           </packing>
         </child>
@@ -288,27 +303,88 @@
             <property name="y">90</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkLabel" id="label7">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Moduły:</property>
+          </object>
+          <packing>
+            <property name="x">20</property>
+            <property name="y">47</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="menu_hrv_dfa">
+            <property name="label" translatable="yes">HRV_DFA</property>
+            <property name="width_request">120</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">370</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="menu_waves">
+            <property name="label" translatable="yes">WAVES</property>
+            <property name="width_request">120</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">510</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="menu_hrv1">
+            <property name="label" translatable="yes">HRV1</property>
+            <property name="width_request">120</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">650</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
       </object>
     </child>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-open</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-save</property>
   </object>
   <object class="GtkFixed" id="r_peaks_fixed">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
       <object class="GtkButton" id="button100">
-        <property name="label" translatable="yes">Przykladowy button</property>
-        <property name="width_request">100</property>
-        <property name="height_request">80</property>
+        <property name="label" translatable="yes">Wyznacz</property>
+        <property name="width_request">200</property>
+        <property name="height_request">35</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="margin_left">30</property>
-        <property name="margin_top">30</property>
         <property name="resize_mode">queue</property>
       </object>
       <packing>
-        <property name="x">33</property>
-        <property name="y">29</property>
+        <property name="x">20</property>
+        <property name="y">15</property>
       </packing>
     </child>
   </object>
@@ -324,32 +400,32 @@
         <property name="height_request">100</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_top">1</property>
         <child>
           <object class="GtkLabel" id="label1">
-            <property name="width_request">340</property>
-            <property name="height_request">30</property>
+            <property name="width_request">284</property>
+            <property name="height_request">20</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Podaj ilość próbek do wyświetlenia na wykresie:</property>
           </object>
           <packing>
-            <property name="x">5</property>
-            <property name="y">10</property>
+            <property name="x">15</property>
+            <property name="y">15</property>
           </packing>
         </child>
         <child>
           <object class="GtkEntry" id="entry_resolution">
             <property name="width_request">90</property>
-            <property name="height_request">30</property>
+            <property name="height_request">25</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="opacity">0.93999999999999995</property>
             <property name="max_length">10</property>
             <property name="width_chars">0</property>
           </object>
           <packing>
-            <property name="x">340</property>
-            <property name="y">10</property>
+            <property name="x">313</property>
+            <property name="y">12</property>
           </packing>
         </child>
         <child>
@@ -363,8 +439,85 @@
             <property name="receives_default">True</property>
           </object>
           <packing>
-            <property name="x">125</property>
-            <property name="y">55</property>
+            <property name="x">127</property>
+            <property name="y">52</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window_load_params">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkLabel" id="label5">
+            <property name="width_request">232</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Podaj rekord bazy danych PhysioBank:</property>
+          </object>
+          <packing>
+            <property name="x">15</property>
+            <property name="y">16</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="record">
+            <property name="width_request">158</property>
+            <property name="height_request">25</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="text" translatable="yes">aami-ec13/aami3a</property>
+          </object>
+          <packing>
+            <property name="x">310</property>
+            <property name="y">15</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label6">
+            <property name="width_request">275</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Podaj ilość sekund lub "e" dla pełnego rekordu:</property>
+            <property name="width_chars">8</property>
+          </object>
+          <packing>
+            <property name="x">15</property>
+            <property name="y">52</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="seconds">
+            <property name="width_request">158</property>
+            <property name="height_request">25</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="text" translatable="yes">e</property>
+          </object>
+          <packing>
+            <property name="x">310</property>
+            <property name="y">50</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_loadsignal">
+            <property name="label" translatable="yes">Załaduj</property>
+            <property name="width_request">200</property>
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="yalign">0.49000000953674316</property>
+          </object>
+          <packing>
+            <property name="x">150</property>
+            <property name="y">87</property>
           </packing>
         </child>
       </object>
