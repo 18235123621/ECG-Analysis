@@ -1,0 +1,15 @@
+"Group 0, Signal 0",
+Baseline,2048
+1 signal,
+I/O,can be unbuffered
+Description,ECG
+ADC zero,2048
+Initial value,2072
+Storage format,16
+Length,0
+Starting time,not specified
+Gain,130 adu/mV
+Sampling frequency,720 Hz
+ADC resolution,12 bits
+File,aami3a.dat
+Checksum,-11941

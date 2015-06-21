@@ -124,6 +124,16 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-fullscreen</property>
   </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-open</property>
+  </object>
+  <object class="GtkImage" id="image5">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-save</property>
+  </object>
   <object class="GtkWindow" id="mainwindow">
     <property name="width_request">900</property>
     <property name="can_focus">False</property>
@@ -135,10 +145,10 @@
         <property name="can_focus">False</property>
         <child>
           <object class="GtkMenuBar" id="menubar1">
+            <property name="width_request">900</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">baseline</property>
-            <property name="width_request">900</property>
             <child>
               <object class="GtkMenuItem" id="menu_file">
                 <property name="visible">True</property>
@@ -360,16 +370,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkImage" id="image4">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-open</property>
-  </object>
-  <object class="GtkImage" id="image5">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-save</property>
-  </object>
   <object class="GtkFixed" id="r_peaks_fixed">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -403,8 +403,6 @@
         <property name="can_focus">False</property>
         <child>
           <object class="GtkLabel" id="label1">
-            <property name="width_request">284</property>
-            <property name="height_request">20</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Podaj ilość próbek do wyświetlenia na wykresie:</property>
@@ -425,7 +423,7 @@
             <property name="width_chars">0</property>
           </object>
           <packing>
-            <property name="x">313</property>
+            <property name="x">330</property>
             <property name="y">12</property>
           </packing>
         </child>
@@ -456,8 +454,6 @@
         <property name="can_focus">False</property>
         <child>
           <object class="GtkLabel" id="label5">
-            <property name="width_request">232</property>
-            <property name="height_request">20</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Podaj rekord bazy danych PhysioBank:</property>
@@ -476,14 +472,12 @@
             <property name="text" translatable="yes">aami-ec13/aami3a</property>
           </object>
           <packing>
-            <property name="x">310</property>
+            <property name="x">360</property>
             <property name="y">15</property>
           </packing>
         </child>
         <child>
           <object class="GtkLabel" id="label6">
-            <property name="width_request">275</property>
-            <property name="height_request">20</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Podaj ilość sekund lub "e" dla pełnego rekordu:</property>
@@ -503,7 +497,7 @@
             <property name="text" translatable="yes">e</property>
           </object>
           <packing>
-            <property name="x">310</property>
+            <property name="x">360</property>
             <property name="y">50</property>
           </packing>
         </child>
