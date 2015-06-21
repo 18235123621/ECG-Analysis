@@ -40,6 +40,8 @@ getres(signal::Signal) = int(split(signal.meta["ADC resolution"])[1])
 
 getfreq(signal::Signal) = int(split(signal.meta["Sampling frequency"])[1])
 
+getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
+
 getPonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
 
 getPend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))

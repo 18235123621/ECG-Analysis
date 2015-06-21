@@ -67,7 +67,7 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="width_chars">0</property>
-        <property name="text" translatable="yes">360</property>
+        <property name="text" translatable="yes">720</property>
       </object>
       <packing>
         <property name="x">230</property>
@@ -232,15 +232,15 @@
         <child>
           <object class="GtkImage" id="wykres">
             <property name="width_request">800</property>
-            <property name="height_request">200</property>
-            <property name="visible">True</property>
+            <property name="height_request">300</property>
+            <property name="visible">False</property>
             <property name="can_focus">False</property>
             <property name="opacity">0.98999999999999999</property>
             <property name="pixbuf">wykres.jpg</property>
           </object>
           <packing>
             <property name="x">50</property>
-            <property name="y">490</property>
+            <property name="y">390</property>
           </packing>
         </child>
         <child>
@@ -248,7 +248,7 @@
             <property name="label" translatable="yes">&lt;</property>
             <property name="width_request">30</property>
             <property name="height_request">100</property>
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="xalign">0.56000000238418579</property>
@@ -256,7 +256,7 @@
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">540</property>
+            <property name="y">500</property>
           </packing>
         </child>
         <child>
@@ -264,14 +264,14 @@
             <property name="label" translatable="yes">&gt;</property>
             <property name="width_request">30</property>
             <property name="height_request">100</property>
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="xalign">0.43999999761581421</property>
           </object>
           <packing>
             <property name="x">860</property>
-            <property name="y">540</property>
+            <property name="y">500</property>
           </packing>
         </child>
         <child>
@@ -305,7 +305,7 @@
         <child>
           <object class="GtkFixed" id="modules">
             <property name="width_request">880</property>
-            <property name="height_request">400</property>
+            <property name="height_request">300</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>

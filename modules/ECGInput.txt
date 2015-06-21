@@ -14,6 +14,7 @@ Oprócz tego dostępne są metody:
 - savesignal(filename, signal) - zapisuje signal do trzech plików filename_{data,meta,anno}.csv
 - getres(signal) - zwraca rozdzielczość próbkowania w bitach (max. wartość próbki to 2^res)
 - getfreq(signal) - zwraca częstotliwość próbkowania sygnału w Hz
+- getbaseline(signal) - zwraca wartość linii izoelektrycznej
 - getPonset(signal) - zwraca posortowany wektor próbek oznaczonych jako Ponset
 - getPend(signal) - zwraca posortowany wektor nrów próbek oznaczonych jako Pend
 - getQRSonset(signal) - zwraca posortowany wektor nrów próbek oznaczonych jako QRSonset

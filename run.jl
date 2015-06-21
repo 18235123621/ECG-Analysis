@@ -1,7 +1,7 @@
 
 println("\n\n#############################################");
 println("#");
-println("# Przetwarzanie sygnałów 2015");
+println("# Przetwarzanie sygnałów 2015 wersja 0.1");
 println("#");
 println("#############################################\n");
 
@@ -33,23 +33,25 @@ signal = Signal()
 
 # PODSTAWOWE FUNKCJE - CORE
 
-function reload_plot(page=0)
+function reload_plot()
 
-    global wykres, signal, current_page, items_per_page
+    global wykres, signal, current_page, items_per_page, current_page
 
-    datalength = length(signal.data)
+    data = signal.data
+    datalength = length(data)
 
     if datalength == 0
-        return
+        data = [0.0]
+        datalength = 1
     end
 
-    if page < 0
-        page = 0
+    if current_page < 0
+        current_page = 0
     end
 
-    figure(1, figsize=[9, 2], dpi=100, facecolor="#f2f1f0")
+    figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
 
-    xstart = page * items_per_page
+    xstart = current_page * items_per_page
     xend = xstart + items_per_page
 
     if xstart == 0
@@ -58,7 +60,7 @@ function reload_plot(page=0)
 
     if xstart > datalength
         page = floor(datalength / items_per_page)
-        xstart = page * items_per_page
+        xstart = current_page * items_per_page
         if xstart == 0
             xstart = 1
         end
@@ -67,16 +69,16 @@ function reload_plot(page=0)
         xend = datalength
     end
 
-    current_page = page
-
     x = [xstart:xend]
-
-    println("Generuje wykres z przedzialu $xstart:$xend");
-
-    plot(x, signal.data[xstart:xend])
+    println("Generuje wykres z przedzialu $xstart:$xend")
+    plot(x, data[xstart:xend])
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
+end
+
+function refresh_fs()
+    setproperty!(GAccessor.object(builder_main,"baseline_entry_fs"), :text, getfreq(signal))
 end
 
 function hide_window(win)
@@ -142,21 +144,25 @@ setproperty!(window_load_params, :window_position, Main.Base.int32(3)) # ustawie
 # MENU Wczytaj sygnał z pliku
 sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_file_open"), :activate) do widget
     global signal
-    sig_file = open_dialog("Wczytaj plik CSV z sygnałem EKG"; parent = MainWindow)
-    sig_file = split(sig_file, '.')[1] #bez rozszerzenia, jest dodawane w metodzie opensignal
+    sig_file = open_dialog("Wczytaj plik CSV z sygnałem EKG", MainWindow, ("*_data.csv",))
+    sig_file = split(split(sig_file, '.')[1], '_')[1] #bez rozszerzenia i sufixu, jest dodawane w metodzie opensignal
     signal = opensignal(sig_file)
+    println("Zaladowano plik: $sig_file")
+    println("Metadane:")
+    println(signal.meta)
     reload_plot()
+    refresh_fs()
 end
 
 # MENU Wczytaj sygnał z PhysioBank
-sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_record_load"), :activate) do widget
+sig_menu_record_load = signal_connect(GAccessor.object(builder_main,"menu_record_load"), :activate) do widget
     show_window(window_load_params)
 end
 
 # MENU Zapisz sygnał
-sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_file_save"), :activate) do widget
-    sig_file = open_dialog("Zapisz do pliku CSV"; parent = MainWindow)
-    sig_file = split(sig_file, '.')[1] #bez rozszerzenia, jest dodawane w metodzie opensignal
+sig_menu_file_save = signal_connect(GAccessor.object(builder_main,"menu_file_save"), :activate) do widget
+    sig_file = save_dialog("Zapisz do pliku CSV", MainWindow, ("*_data.csv",))
+    sig_file = split(split(sig_file, '.')[1], '_')[1] #bez rozszerzenia i sufixu, jest dodawane w metodzie savesignal
     savesignal(sig_file, signal)
 end
 
@@ -168,12 +174,16 @@ end
 
 # Suwak w lewo
 sig_move_left = signal_connect(GAccessor.object(builder_main,"move_left"), :clicked) do widget
-    reload_plot(current_page-1)
+    global current_page
+    current_page = current_page - 1
+    reload_plot()
 end
 
 # Suwak w prawo
 sig_move_right = signal_connect(GAccessor.object(builder_main,"move_right"), :clicked) do widget
-    reload_plot(current_page+1)
+    global current_page
+    current_page = current_page + 1
+    reload_plot()
 end
 
 # Otwarcie okna zmiany rozdzielczosci wykresu
@@ -206,6 +216,7 @@ sig_button_loadsignal = signal_connect(GAccessor.object(builder_main,"button_loa
     println("Metadane:")
     println(signal.meta)
     reload_plot()
+    refresh_fs()
 end
 
 # Otwarcie okna Baseline
@@ -224,10 +235,6 @@ include("modules/Baseline_sig.jl");
 # WYSWIETLANIE GUI
 
 showall(MainWindow)
-#showall(window_change_resolution)
-#hide_window(window_change_resolution)
-#showall(window_load_params)
-#hide_window(window_load_params)
 
 push!(modules, baseline_fixed)
 
@@ -240,8 +247,4 @@ if !isinteractive()
         notify(c)
     end
     wait(c)
-end
-
-signal_connect(MainWindow, :destroy) do widget
-    #exit()
 end

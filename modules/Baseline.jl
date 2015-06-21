@@ -2,7 +2,7 @@ module Baseline
 using DSP
 
 #------------------------------MovingAverage--------------------------
-	function movingAverage(signal, fs = 360, fc = 0.8)
+	function movingAverage(signal, fs = 720, fc = 0.8)
 
 		Fcnorm = fc/fs;
 		windowSize = round(sqrt(0.196196+Fcnorm^2)/Fcnorm);
@@ -32,7 +32,7 @@ using DSP
 	end
 
 #------------------------------Butterworth----------------------------
-	function butterworthFilter(signal, fs = 360, fc = 0.8)
+	function butterworthFilter(signal, fs = 720, fc = 0.8)
 
 		high = Highpass(fc, fs=fs);
 		butter = Butterworth(2);
@@ -45,7 +45,7 @@ using DSP
 	end
 
 #------------------------------LMS------------------------------------
-	function lms(signal, fs = 360, fc = 0.8)
+	function lms(signal, fs = 720, fc = 0.8)
 
 		u = fc/fs*3.14;
 
