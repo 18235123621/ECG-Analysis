@@ -20,10 +20,14 @@ pygui(false)
 
 # LADOWANIE MODULOW DO PRZETWARZANIA SYGNALU
 
-include("modules/ECGInput.jl") # Modul I/O
-include("modules/Baseline.jl") # Modul Baseline
+include("modules/ECGInput.jl")
+include("modules/Baseline.jl")
+#include("modules/Waves.jl")
+#include("modules/Hrv_dfa.jl")
 using ECGInput
 using Baseline
+#using Waves
+#using Hrv_dfa
 
 # INICJALIZACJA PODSTAWOWYCH ZMIENNYCH GLOBALNYCH
 

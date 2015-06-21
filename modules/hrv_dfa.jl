@@ -1,4 +1,4 @@
-module hrv_dfa
+module Hrv_dfa
 	function polyfit(x, y, polyDegree)
 
 		m = zeros(length(x), polyDegree+1);
