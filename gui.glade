@@ -138,6 +138,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">baseline</property>
+            <property name="width_request">900</property>
             <child>
               <object class="GtkMenuItem" id="menu_file">
                 <property name="visible">True</property>
@@ -448,6 +449,7 @@
   </object>
   <object class="GtkWindow" id="window_load_params">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Parametry ladowania sygnalu z PhysioBank</property>
     <child>
       <object class="GtkFixed" id="fixed1">
         <property name="visible">True</property>

@@ -29,11 +29,19 @@ using Baseline
 
 current_page = 0
 items_per_page = 2000
-data = []
+signal = Signal()
 
 # PODSTAWOWE FUNKCJE - CORE
 
-function reload_plot(wykres, arg_data, page=0, items_per_page=5000)
+function reload_plot(page=0)
+
+    global wykres, signal, current_page, items_per_page
+
+    datalength = length(signal.data)
+
+    if datalength == 0
+        return
+    end
 
     if page < 0
         page = 0
@@ -43,33 +51,30 @@ function reload_plot(wykres, arg_data, page=0, items_per_page=5000)
 
     xstart = page * items_per_page
     xend = xstart + items_per_page
+
     if xstart == 0
         xstart = 1
     end
 
-    if length(arg_data) == 0
-        xstart = 1
-        xend = 0
-    elseif xstart > length(arg_data)
-        page = floor(length(arg_data) / items_per_page)
+    if xstart > datalength
+        page = floor(datalength / items_per_page)
         xstart = page * items_per_page
         if xstart == 0
             xstart = 1
         end
-        xend = length(arg_data)
-    elseif xend > length(arg_data)
-        xend = length(arg_data)
+        xend = datalength
+    elseif xend > datalength
+        xend = datalength
     end
 
-    global current_page
     current_page = page
 
     x = [xstart:xend]
 
     println("Generuje wykres z przedzialu $xstart:$xend");
 
-    plot(x,arg_data[xstart:xend])
-    savefig("wykres.jpg",format="jpg",bbox_inches="tight",pad_inches=0,facecolor="#f2f1f0")
+    plot(x, signal.data[xstart:xend])
+    savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
 end
@@ -79,7 +84,7 @@ function hide_window(win)
 end
 
 function show_window(win)
-    ccall((:gtk_widget_show,Gtk.libgtk),Void,(Ptr{Gtk.GObject},),win)
+    ccall((:gtk_widget_show_all,Gtk.libgtk),Void,(Ptr{Gtk.GObject},),win)
 end
 
 function clear_workspace()
@@ -89,40 +94,70 @@ function clear_workspace()
     if hasparent(r_peaks_fixed)
         delete!(modules, r_peaks_fixed)
     end
+    #=
+    if hasparent(waves_fixed)
+        delete!(modules, waves_fixed)
+    end
+    if hasparent(hrv_dfa_fixed)
+        delete!(modules, hrv_dfa_fixed)
+    end
+    if hasparent(hrv1_fixed)
+        delete!(modules, hrv1_fixed)
+    end
+    =#
 end
 
 # TWORZENIE BUILDEROW DLA WSZYSTKICH GUI
 
 builder_main = Gtk.GtkBuilderLeaf(filename="gui.glade");
+println("Ladowanie GUI...")
 
 # TWORZENIE UCHWYTOW DO OKIEN ORAZ WIDGETOW
 
 !isdefined(:MainWindow) || destroy(MainWindow)
 !isdefined(:window_change_resolution) || destroy(window_change_resolution)
+!isdefined(:window_load_params) || destroy(window_load_params)
 
 MainWindow = GAccessor.object(builder_main,"mainwindow");
 modules = GAccessor.object(builder_main,"modules")
 window_change_resolution = GAccessor.object(builder_main,"window_change_resolution");
+window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
 
 # Okna modulow
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
 r_peaks_fixed = GAccessor.object(builder_main,"r_peaks_fixed")
+waves_fixed = null #TODO: dodac w glade
+hrv_dfa_fixed = null
+hrv1_fixed = null
 
-reload_plot(wykres, data, 0, items_per_page)
+reload_plot()
 # ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
 setproperty!(MainWindow, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
 setproperty!(window_change_resolution, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
+setproperty!(window_load_params, :window_position, Main.Base.int32(3)) # ustawienie okna na srodku
 
 # OBSLUGA INTERAKCJI Z GUI
 
-# MENU Wczytaj sygnał
+# MENU Wczytaj sygnał z pliku
 sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_file_open"), :activate) do widget
-    global data
-    sig_file = open_dialog("Wczytaj plik z sygnałem EKG"; parent = MainWindow)
-    data = readdlm(sig_file)
-    # data = Baseline.movingAverage(data)
-    reload_plot(wykres, data, 0, items_per_page)
+    global signal
+    sig_file = open_dialog("Wczytaj plik CSV z sygnałem EKG"; parent = MainWindow)
+    sig_file = split(sig_file, '.')[1] #bez rozszerzenia, jest dodawane w metodzie opensignal
+    signal = opensignal(sig_file)
+    reload_plot()
+end
+
+# MENU Wczytaj sygnał z PhysioBank
+sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_record_load"), :activate) do widget
+    show_window(window_load_params)
+end
+
+# MENU Zapisz sygnał
+sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_file_save"), :activate) do widget
+    sig_file = open_dialog("Zapisz do pliku CSV"; parent = MainWindow)
+    sig_file = split(sig_file, '.')[1] #bez rozszerzenia, jest dodawane w metodzie opensignal
+    savesignal(sig_file, signal)
 end
 
 # MENU Zakończ
@@ -133,12 +168,12 @@ end
 
 # Suwak w lewo
 sig_move_left = signal_connect(GAccessor.object(builder_main,"move_left"), :clicked) do widget
-    reload_plot(wykres, data, current_page-1, items_per_page)
+    reload_plot(current_page-1)
 end
 
 # Suwak w prawo
 sig_move_right = signal_connect(GAccessor.object(builder_main,"move_right"), :clicked) do widget
-    reload_plot(wykres, data, current_page+1, items_per_page)
+    reload_plot(current_page+1)
 end
 
 # Otwarcie okna zmiany rozdzielczosci wykresu
@@ -149,15 +184,28 @@ end
 
 # Zmiana rozdzielczosci wykresu
 sig_button_save_resolution = signal_connect(GAccessor.object(builder_main,"button_save_resolution"), :clicked) do widget
-    global data
     global items_per_page
     new_items_per_page = getproperty(GAccessor.object(builder_main,"entry_resolution"), :text, String)
     if new_items_per_page != ""
-        items_per_page = parse(Int,new_items_per_page)
+        items_per_page = parse(Int, new_items_per_page)
     end
     hide_window(window_change_resolution)
     println("Nowa rozdzielczosc wykresu: $items_per_page probek")
-    reload_plot(wykres, data, 0, items_per_page)
+    reload_plot()
+end
+
+#Ladowanie rekordu z PhysioBank
+sig_button_loadsignal = signal_connect(GAccessor.object(builder_main,"button_loadsignal"), :clicked) do widget
+    global signal
+    record = getproperty(GAccessor.object(builder_main,"record"), :text, String)
+    seconds = getproperty(GAccessor.object(builder_main,"seconds"), :text, String)
+    signalNo = 0
+    signal = loadsignal(record, signalNo, seconds)
+    hide_window(window_load_params)
+    println("Zaladowano rekord PhysioBank: $record")
+    println("Metadane:")
+    println(signal.meta)
+    reload_plot()
 end
 
 # Otwarcie okna Baseline
@@ -176,8 +224,10 @@ include("modules/Baseline_sig.jl");
 # WYSWIETLANIE GUI
 
 showall(MainWindow)
-showall(window_change_resolution)
-hide_window(window_change_resolution)
+#showall(window_change_resolution)
+#hide_window(window_change_resolution)
+#showall(window_load_params)
+#hide_window(window_load_params)
 
 push!(modules, baseline_fixed)
 
@@ -192,3 +242,6 @@ if !isinteractive()
     wait(c)
 end
 
+signal_connect(MainWindow, :destroy) do widget
+    #exit()
+end
