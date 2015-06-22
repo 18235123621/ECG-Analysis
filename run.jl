@@ -11,6 +11,8 @@ println("#############################################\n");
 # Pkg.add("PyCall")
 # Pkg.add("PyPlot")
 # Pkg.add("DSP")
+# Pkg.add("Dierckx")
+# Pkg.add("ApproxFun")
 
 using Gtk
 using Gtk.ShortNames
@@ -24,8 +26,8 @@ include("modules/ECGInput.jl")
 include("modules/Baseline.jl")
 include("modules/Waves.jl")
 include("modules/HRV.jl")
-include("modules/HRV_DFA.jl")
-using ECGInput
+include("modules/hrv_dfa.jl")
+import ECGInput
 using Baseline
 using Waves
 using HRV
@@ -53,6 +55,17 @@ function reload_plot()
     if current_page < 0
         current_page = 0
     end
+
+    if datalength>1
+       println("In IF");
+       freq = ECGInput.getfreq(signal);
+       println("In IF after call");
+       println("Freq = $freq");
+    else
+       freq =1;
+       println("ERROR Freq = $freq");
+    end
+   
 
     figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
 
