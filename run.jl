@@ -5,12 +5,14 @@ println("# Przetwarzanie sygnałów 2015 wersja 0.1");
 println("#");
 println("#############################################\n");
 
-# LADOWANIE BIBLIOTEK
+# ŁADOWANIE BIBLIOTEK
 
 # Pkg.add("Gtk")
 # Pkg.add("PyCall")
 # Pkg.add("PyPlot")
 # Pkg.add("DSP")
+# Pkg.add("Dierckx")
+# Pkg.add("ApproxFun")
 
 using Gtk
 using Gtk.ShortNames
@@ -18,12 +20,18 @@ using PyPlot # http://matplotlib.org/api/pyplot_summary.html
 
 pygui(false)
 
-# LADOWANIE MODULOW DO PRZETWARZANIA SYGNALU
+# ŁADOWANIE MODUŁÓW DO PRZETWARZANIA SYGNAŁU
 
-include("modules/ECGInput.jl") # Modul I/O
-include("modules/Baseline.jl") # Modul Baseline
+include("modules/ECGInput.jl")
+include("modules/Baseline.jl")
+include("modules/Waves.jl")
+include("modules/HRV.jl")
+include("modules/hrv_dfa.jl")
 using ECGInput
 using Baseline
+using Waves
+using HRV
+using HRV_DFA
 
 # INICJALIZACJA PODSTAWOWYCH ZMIENNYCH GLOBALNYCH
 
@@ -34,7 +42,6 @@ signal = Signal()
 # PODSTAWOWE FUNKCJE - CORE
 
 function reload_plot()
-
     global wykres, signal, current_page, items_per_page, current_page
 
     data = signal.data
@@ -49,10 +56,19 @@ function reload_plot()
         current_page = 0
     end
 
+    if datalength>1
+       freq = ECGInput.getfreq(signal);
+       println("Freq = $freq");
+    else
+       freq =1;
+       println("ERROR Freq = $freq");
+    end
+   
+
     figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
 
-    xstart = current_page * items_per_page
-    xend = xstart + items_per_page
+    xstart = current_page * (items_per_page )
+    xend = xstart + (items_per_page )
 
     if xstart == 0
         xstart = 1
@@ -69,9 +85,11 @@ function reload_plot()
         xend = datalength
     end
 
-    x = [xstart:xend]
-    println("Generuje wykres z przedzialu $xstart:$xend")
+    x = collect(xstart/freq:(1/freq):xend/freq)
     plot(x, data[xstart:xend])
+    axis([xstart/freq , xend/freq , minimum(data[xstart:xend]), maximum(data[xstart:xend])])
+    xlabel("time [s]")
+    ylabel("voltage (mV)")
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
@@ -96,7 +114,7 @@ function clear_workspace()
     if hasparent(r_peaks_fixed)
         delete!(modules, r_peaks_fixed)
     end
-    #=
+    #= TODO: podłączyć pozostałe moduły
     if hasparent(waves_fixed)
         delete!(modules, waves_fixed)
     end
@@ -109,12 +127,12 @@ function clear_workspace()
     =#
 end
 
-# TWORZENIE BUILDEROW DLA WSZYSTKICH GUI
+# TWORZENIE BUILDERÓW DLA WSZYSTKICH GUI
 
 builder_main = Gtk.GtkBuilderLeaf(filename="gui.glade");
-println("Ladowanie GUI...")
+println("Ładowanie GUI...")
 
-# TWORZENIE UCHWYTOW DO OKIEN ORAZ WIDGETOW
+# TWORZENIE UCHWYTÓW DO OKIEN ORAZ WIDGETÓW
 
 !isdefined(:MainWindow) || destroy(MainWindow)
 !isdefined(:window_change_resolution) || destroy(window_change_resolution)
@@ -126,12 +144,12 @@ window_change_resolution = GAccessor.object(builder_main,"window_change_resoluti
 window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
 
-# Okna modulow
+# Okna modułów
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
 r_peaks_fixed = GAccessor.object(builder_main,"r_peaks_fixed")
-waves_fixed = null #TODO: dodac w glade
-hrv_dfa_fixed = null
-hrv1_fixed = null
+waves_fixed = null #TODO: dodać w gui.glade
+hrv_dfa_fixed = null #TODO: dodać w gui.glade
+hrv1_fixed = null #TODO: dodać w gui.glade
 
 reload_plot()
 # ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
@@ -145,9 +163,9 @@ setproperty!(window_load_params, :window_position, Main.Base.int32(3)) # ustawie
 sig_menu_file_open = signal_connect(GAccessor.object(builder_main,"menu_file_open"), :activate) do widget
     global signal
     sig_file = open_dialog("Wczytaj plik CSV z sygnałem EKG", MainWindow, ("*_data.csv",))
-    sig_file = split(split(sig_file, '.')[1], '_')[1] #bez rozszerzenia i sufixu, jest dodawane w metodzie opensignal
+    sig_file = split(split(sig_file, '.')[1], '_')[1] # bez rozszerzenia i sufixu, jest dodawane w metodzie opensignal
     signal = opensignal(sig_file)
-    println("Zaladowano plik: $sig_file")
+    println("Załadowano plik: $sig_file")
     println("Metadane:")
     println(signal.meta)
     reload_plot()
@@ -204,7 +222,7 @@ sig_button_save_resolution = signal_connect(GAccessor.object(builder_main,"butto
     reload_plot()
 end
 
-#Ladowanie rekordu z PhysioBank
+# Ładowanie rekordu z PhysioBank
 sig_button_loadsignal = signal_connect(GAccessor.object(builder_main,"button_loadsignal"), :clicked) do widget
     global signal
     record = getproperty(GAccessor.object(builder_main,"record"), :text, String)
@@ -212,27 +230,50 @@ sig_button_loadsignal = signal_connect(GAccessor.object(builder_main,"button_loa
     signalNo = 0
     signal = loadsignal(record, signalNo, seconds)
     hide_window(window_load_params)
-    println("Zaladowano rekord PhysioBank: $record")
+    println("Załadowano rekord PhysioBank: $record")
     println("Metadane:")
     println(signal.meta)
     reload_plot()
     refresh_fs()
 end
 
-# Otwarcie okna Baseline
+# Ładowanie modułu Baseline
 sig_menu_baseline = signal_connect(GAccessor.object(builder_main,"menu_baseline"), :clicked) do widget
     clear_workspace()
     push!(modules, baseline_fixed)
 end
 
+# Ładowanie modułu R_peaks
 sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_r_peaks"), :clicked) do widget
     clear_workspace()
     push!(modules, r_peaks_fixed)
 end
 
+#= TODO: podłączyć pozostałe moduły
+# Ładowanie modułu Waves
+sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_waves"), :clicked) do widget
+    clear_workspace()
+    push!(modules, waves_fixed)
+end
+
+# Ładowanie modułu HRV1
+sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv1"), :clicked) do widget
+    clear_workspace()
+    push!(modules, hrv1_fixed)
+end
+
+# Ładowanie modułu HRV_DFA
+sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv_dfa"), :clicked) do widget
+    clear_workspace()
+    push!(modules, hrv_dfa_fixed)
+end
+=#
+
+# PRZEKAZANIE SYGNAŁU DO MODUŁÓW
+
 include("modules/Baseline_sig.jl");
 
-# WYSWIETLANIE GUI
+# WYŚWIETLANIE GUI
 
 showall(MainWindow)
 

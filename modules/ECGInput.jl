@@ -38,7 +38,11 @@ end
 
 getres(signal::Signal) = int(split(signal.meta["ADC resolution"])[1])
 
-getfreq(signal::Signal) = int(split(signal.meta["Sampling frequency"])[1])
+function getfreq(signal)
+   return int(split(signal.meta["Sampling frequency"])[1]);
+end
+
+
 
 getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
 
