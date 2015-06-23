@@ -27,7 +27,7 @@ include("modules/Baseline.jl")
 include("modules/Waves.jl")
 include("modules/HRV.jl")
 include("modules/hrv_dfa.jl")
-import ECGInput
+using ECGInput
 using Baseline
 using Waves
 using HRV
@@ -57,9 +57,7 @@ function reload_plot()
     end
 
     if datalength>1
-       println("In IF");
        freq = ECGInput.getfreq(signal);
-       println("In IF after call");
        println("Freq = $freq");
     else
        freq =1;
@@ -69,8 +67,8 @@ function reload_plot()
 
     figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
 
-    xstart = current_page * items_per_page
-    xend = xstart + items_per_page
+    xstart = current_page * (items_per_page )
+    xend = xstart + (items_per_page )
 
     if xstart == 0
         xstart = 1
@@ -87,9 +85,11 @@ function reload_plot()
         xend = datalength
     end
 
-    x = [xstart:xend]
-    println("Generuję wykres z przedziału $xstart:$xend")
+    x = collect(xstart/freq:(1/freq):xend/freq)
     plot(x, data[xstart:xend])
+    axis([xstart/freq , xend/freq , minimum(data[xstart:xend]), maximum(data[xstart:xend])])
+    xlabel("time [s]")
+    ylabel("voltage (mV)")
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
