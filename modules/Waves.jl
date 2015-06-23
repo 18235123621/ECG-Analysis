@@ -138,18 +138,19 @@ function ecgPeaks(fceg, R)
           end
       end
 
-      dt = (M[POffSet[n]] - M[POffSet[n]-dstep]) / dstep
+	shift=i    
+      dt = (M[Q[n]-shift] - M[Q[n]-dstep-shift]) / dstep
 
       # Szukanie POnSet
       for i = 2:1:limit
-      if POffSet[n] + dstep + i < N
-        dtn = (M[POffSet[n]-i] - M[POffSet[n]-i-dstep]) / dstep
+      #if Q[n] + dstep + i < N
+        dtn = (M[Q[n]-i] - M[Q[n]-i-dstep]) / dstep
         if (dtn * dt) < 0 && dtn < 0
-          POnSet = push!(POnSet, POffSet[n]-i)
+          POnSet = push!(POnSet, Q[n]-i-shift)
           break
         end
         dt = copy(dtn)
-       end
+       #end
       end
     end
 
@@ -170,13 +171,14 @@ function ecgPeaks(fceg, R)
         dt = copy(dtn)
       end
 
-      dt = (M[TOnSet[n]+dstep] - M[TOnSet[n]]) / dstep
+      shift=i      
+      dt = (M[S[n]+dstep+shift] - M[S[n]+shift]) / dstep
 
       # Szukanie TOffSet
       for i = 2:1:limit
-        dtn = (M[TOnSet[n]+i+dstep] - M[TOnSet[n]+i]) / dstep
+        dtn = (M[Q[n]+i+dstep+shift] - M[TOnSet[n]+i+shift]) / dstep
         if (dtn * dt) < 0 && dtn < 0
-          TOffSet = push!(TOffSet, TOnSet[n]+i)
+          TOffSet = push!(TOffSet, S[n]+i+shift)
           break
         end
         dt = copy(dtn)
