@@ -1,0 +1,76 @@
+
+HRV-Michal Mach
+
+
+HRV.jl kod w Julii
+HRV.m  kod w matlabie 
+
+
+nsr001.txt , chf206.txt  pliki zawieraj¹ce wektor HRV wyobreniony z plików *.dat
+Potrzebne do odpalenia/przetestowania kodu w julii.
+
+Przy odpaleniu testu nalezy zmienic sciezke do plików HRV.jl oraz nsr001.txt,chf206.txt
+
+Odpalenie testu wykonuje sie poprzez skopiowinie zawartosci pliku test.txt do konsoli Julii
+
+
+Do poprawnego dzialania programu w julii
+wymagane sa DSP, Dierckx które mo¿na znaleŸæ na stronach
+https://github.com/JuliaDSP/DSP.jl    
+https://github.com/kbarbary/Dierckx.jl
+
+#####################################################
+JULIA
+dla chf206.dat
+size = 135471 Array{Float64}
+freq: 105,2 s
+time: 2.04 s
+poincare: 0.1 s
+
+//
+size = 30000 Array{Float64}
+freq = 7.45 s
+time = 0.53 s
+poincare 0.02 s
+----------------------------------------
+dla nsr001.dat
+
+size = 106460 Array{Float64}
+freq: 130.6s
+time: 0.83 s
+poincare: 0.05 s
+
+//
+size = 30000 Array{Float64}
+freq = 12.08 s
+time = 0.35 s
+poincare 0.02 s
+
+#################################################
+MATLAB
+
+dla chf206.dat
+size = 135471 Array{Float64}
+freq: 150.38,2 s
+time: 1.05 s
+poincare: 0.01 s
+
+//
+size = 30000 Array{Float64}
+freq = 7.45 s
+time = 0.53 s
+poincare 0.02 s
+
+-----------------------------------------
+dla nsr001.dat
+
+size = 106460  Array{Float64}
+freq: 124.81s
+time: 1.08 s
+poincare: 0.01 s
+
+//
+size = 30000 Array{Float64}
+freq = 13.30 s
+time = 0.26 s
+poincare 0.002 s
