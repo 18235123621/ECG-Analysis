@@ -31,8 +31,7 @@ using ECGInput
 using Baseline
 using Waves
 using HRV
-using HRV_DFA
-
+using hrv_dfa
 # INICJALIZACJA PODSTAWOWYCH ZMIENNYCH GLOBALNYCH
 
 current_page = 0
@@ -57,7 +56,7 @@ function reload_plot()
     end
 
     if datalength>1
-       freq = ECGInput.getfreq(signal);
+       freq = getfreq(signal);
        println("Freq = $freq");
     else
        freq =1;

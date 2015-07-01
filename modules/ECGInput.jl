@@ -36,24 +36,20 @@ function savesignal(filename::String, signal::Signal)
     writecsv("$(filename)_anno.csv", signal.anno)
 end
 
-getres(signal::Signal) = int(split(signal.meta["ADC resolution"])[1])
+getres(signal) = int(split(signal.meta["ADC resolution"])[1])
 
-function getfreq(signal)
-   return int(split(signal.meta["Sampling frequency"])[1]);
-end
+getfreq(signal) = int(split(signal.meta["Sampling frequency"])[1])
 
+#getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
 
+getPonset(signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
 
-getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
+getPend(signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
 
-getPonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
+getQRSonset(signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
 
-getPend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
+getQRSend(signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
-getQRSonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
-
-getQRSend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
-
-getR(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
+getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
 end
