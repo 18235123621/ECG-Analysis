@@ -22,11 +22,11 @@ pygui(false)
 
 # ŁADOWANIE MODUŁÓW DO PRZETWARZANIA SYGNAŁU
 
-include("modules/ECGInput.jl")
-include("modules/Baseline.jl")
-include("modules/Waves.jl")
-include("modules/HRV.jl")
-include("modules/hrv_dfa.jl")
+reload("modules/ECGInput.jl")
+reload("modules/Baseline.jl")
+reload("modules/Waves.jl")
+reload("modules/HRV.jl")
+reload("modules/hrv_dfa.jl")
 using ECGInput
 using Baseline
 using Waves
@@ -228,6 +228,7 @@ sig_button_loadsignal = signal_connect(GAccessor.object(builder_main,"button_loa
     seconds = getproperty(GAccessor.object(builder_main,"seconds"), :text, String)
     signalNo = 0
     signal = loadsignal(record, signalNo, seconds)
+    signal.data = signal.data./ECGInput.getGain(signal)
     hide_window(window_load_params)
     println("Załadowano rekord PhysioBank: $record")
     println("Metadane:")

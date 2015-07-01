@@ -17,7 +17,16 @@ Signal() = Signal([], Dict(), Dict())
 function loadsignal(record::String, signal::Int=0, time::Any="e")
     data = readcsv(IOBuffer(readall(`wfdb/usr/bin/rdsamp -r $record -c -s $signal -t $time`)), Float32)[:,2]
     meta = readdlm(IOBuffer(readall(`wfdb/usr/bin/wfdbdesc $record`)), ':', String)
-    metadict = Dict(map(lstrip, meta[7:21,1]), map(lstrip, meta[7:21,2]))
+    startingTimeIndex = 8
+    for i=1:length(meta)
+       if isdefined(meta,i)
+          if meta[i,1]=="Starting time"
+             startingTimeIndex=i
+             break
+          end
+       end
+    end
+    metadict = Dict(map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,1]), map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,2]))
     Signal(data, metadict, Dict([(0, "START")]))
 end
 
@@ -36,6 +45,10 @@ function savesignal(filename::String, signal::Signal)
     writecsv("$(filename)_anno.csv", signal.anno)
 end
 
+function getGain(signal) 
+    return int(split(signal.meta["Gain"])[1])
+end
+
 getres(signal) = int(split(signal.meta["ADC resolution"])[1])
 
 getfreq(signal) = int(split(signal.meta["Sampling frequency"])[1])
@@ -51,5 +64,7 @@ getQRSonset(signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", 
 getQRSend(signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
 getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
+
+
 
 end
