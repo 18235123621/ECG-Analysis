@@ -92,14 +92,16 @@ function reload_plot()
     yMinAxis=minimum(data[xstart:xend]) - 0.03*minimum(data[xstart:xend])
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
-    ylabel("voltage (mV)")
-    legend(["Signal","R peak"],ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
+    ylabel("voltage [mV]")
+    legend(["Sygnał","R peak"],ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.hold(false)
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
 end
 
 function handle_R(freq)
+    #todo wyłuskanie indeksów w tej karcie wykresu
     if length(ECGInput.getR(signal))>0 && length(signal.data)>1
         xR = ECGInput.getR(signal).*(1/freq);
         yR = signal.data[ECGInput.getR(signal)]
@@ -109,6 +111,19 @@ function handle_R(freq)
     end
 end
 
+function reload_poincare_plot(poincare)
+
+    figure(2, figsize=[3, 3], dpi=100, facecolor="#f2f1f0")
+    plot(poincare.RR, poincare.RRy,color="blue",marker="o",linewidth=0)
+    title("Poincare plot")
+    xlabel("RR [ms]")
+    ylabel("RR j+1 [ms]")
+    grid()
+    savefig("poincare.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),poincareView,bytestring ("poincare.jpg"))
+
+end
 
 function refresh_fs()
     setproperty!(GAccessor.object(builder_main,"baseline_entry_fs"), :text, getfreq(signal))
@@ -134,12 +149,12 @@ function clear_workspace()
         delete!(modules, waves_fixed)
     end
     if hasparent(hrv_dfa_fixed)
-        delete!(modules, hrv_dfa_fixed)
-    end
+        delete!(modules, hrv_dfa_fixed)  
+    end=#
     if hasparent(hrv1_fixed)
         delete!(modules, hrv1_fixed)
     end
-    =#
+  
 end
 
 # TWORZENIE BUILDERÓW DLA WSZYSTKICH GUI
@@ -158,13 +173,14 @@ modules = GAccessor.object(builder_main,"modules")
 window_change_resolution = GAccessor.object(builder_main,"window_change_resolution");
 window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
+poincareView = GAccessor.object(builder_main,"poincare")
 
 # Okna modułów
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
 r_peaks_fixed = GAccessor.object(builder_main,"r_peaks_fixed")
 waves_fixed = null #TODO: dodać w gui.glade
 hrv_dfa_fixed = null #TODO: dodać w gui.glade
-hrv1_fixed = null #TODO: dodać w gui.glade
+hrv1_fixed = GAccessor.object(builder_main,"hrv1_fixed") #TODO: dodać w gui.glade
 
 reload_plot()
 # ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
@@ -271,13 +287,13 @@ sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_waves"), :
     clear_workspace()
     push!(modules, waves_fixed)
 end
-
+=#
 # Ładowanie modułu HRV1
-sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv1"), :clicked) do widget
+sig_menu_hrv1 = signal_connect(GAccessor.object(builder_main,"menu_hrv1"), :clicked) do widget
     clear_workspace()
     push!(modules, hrv1_fixed)
 end
-
+#=
 # Ładowanie modułu HRV_DFA
 sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv_dfa"), :clicked) do widget
     clear_workspace()
@@ -288,6 +304,7 @@ end
 # PRZEKAZANIE SYGNAŁU DO MODUŁÓW
 
 include("modules/Baseline_sig.jl");
+include("modules/HRV_sig.jl");
 
 # WYŚWIETLANIE GUI
 

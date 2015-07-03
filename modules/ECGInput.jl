@@ -4,7 +4,7 @@ module ECGInput
 #Loads a signal record of given name and optionally given signal number and duration
 #More info: http://www.physionet.org/physiotools/wag/intro.htm
 
-export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR
+export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR , getRRIntervals
 
 type Signal
     data::Array{Float32, 1}
@@ -65,6 +65,6 @@ getQRSend(signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", sign
 
 getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
-
+getRRIntervals(signal) = []
 
 end

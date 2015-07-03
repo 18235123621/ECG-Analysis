@@ -5,6 +5,8 @@ module HRV
 
 using DSP,Dierckx
 
+export TimeDomainType,FrequencyType,Poincare,TimeDomainAnalysis,FrequencyAnalysis
+
 immutable FrequencyType
   TP::Float64
   HF::Float64
@@ -239,7 +241,7 @@ function FrequencyAnalysis(signal::Array{Float64,1},aproxWindows=2.0,fs=2)
     signalReturn);
 end
 
-  function PoincareAnalysis(signal::Array{Float64,1})
+  function PoincareAnalysis(signal)
     signal=signal*1000;
     RR = signal[1:length(signal)-1];
     RRy=  signal[2:length(signal)];
