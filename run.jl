@@ -107,7 +107,7 @@ function handle_R(freq)
         yR = signal.data[ECGInput.getR(signal)]
         plot(xR,yR,color="red",marker="o",linewidth=0)
     else
-        println("R peaks array size = 0");
+        println("ERROR: handleR() R peaks array is empty");
     end
 end
 
