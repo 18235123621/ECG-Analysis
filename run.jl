@@ -57,10 +57,8 @@ function reload_plot()
 
     if datalength>1
        freq = getfreq(signal);
-       println("Freq = $freq");
     else
        freq =1;
-       println("ERROR Freq = $freq");
     end
    
 
@@ -85,14 +83,32 @@ function reload_plot()
     end
 
     x = collect(xstart/freq:(1/freq):xend/freq)
+  
+    plt.hold(true)
     plot(x, data[xstart:xend])
-    axis([xstart/freq , xend/freq , minimum(data[xstart:xend]), maximum(data[xstart:xend])])
+    grid()
+    handle_R(freq)
+    yMaxAxis=maximum(data[xstart:xend]) + 0.03*maximum(data[xstart:xend])
+    yMinAxis=minimum(data[xstart:xend]) - 0.03*minimum(data[xstart:xend])
+    axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
     ylabel("voltage (mV)")
+    legend(["Signal","R peak"],ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
 end
+
+function handle_R(freq)
+    if length(ECGInput.getR(signal))>0 && length(signal.data)>1
+        xR = ECGInput.getR(signal).*(1/freq);
+        yR = signal.data[ECGInput.getR(signal)]
+        plot(xR,yR,color="red",marker="o",linewidth=0)
+    else
+        println("R peaks array size = 0");
+    end
+end
+
 
 function refresh_fs()
     setproperty!(GAccessor.object(builder_main,"baseline_entry_fs"), :text, getfreq(signal))

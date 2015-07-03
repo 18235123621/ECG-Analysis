@@ -469,7 +469,7 @@
             <property name="height_request">25</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="text" translatable="yes">aami-ec13/aami3a</property>
+            <property name="text" translatable="yes">mitdb/100</property>
           </object>
           <packing>
             <property name="x">360</property>
@@ -494,7 +494,7 @@
             <property name="height_request">25</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="text" translatable="yes">e</property>
+            <property name="text" translatable="yes">5</property>
           </object>
           <packing>
             <property name="x">360</property>

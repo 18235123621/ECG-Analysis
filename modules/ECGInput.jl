@@ -63,7 +63,7 @@ getQRSonset(signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", 
 
 getQRSend(signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
-getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
+getR(signal) = [372,948]#sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
 
 
