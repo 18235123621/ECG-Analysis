@@ -124,6 +124,20 @@ function reload_poincare_plot(poincare)
 
 end
 
+function reload_dft_plot(oX,oY)
+
+    figure(3, figsize=[6, 3], dpi=60, facecolor="#f2f1f0")
+    plot(oX, oY,color="red",linewidth=1)
+    title("DFT")
+    xlabel("Częstotliwość")
+    ylabel("|Y(f)|")
+    grid()
+    savefig("dft.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dftView,bytestring ("dft.jpg"))
+
+end
+
 function refresh_fs()
     setproperty!(GAccessor.object(builder_main,"baseline_entry_fs"), :text, getfreq(signal))
 end
@@ -173,6 +187,7 @@ window_change_resolution = GAccessor.object(builder_main,"window_change_resoluti
 window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
 poincareView = GAccessor.object(builder_main,"poincare")
+dftView = GAccessor.object(builder_main,"dft")
 
 # Okna modułów
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")

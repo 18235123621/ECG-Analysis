@@ -126,7 +126,7 @@
       <object class="GtkButton" id="hrv1_execute">
         <property name="label" translatable="yes">Wykonaj</property>
         <property name="name">hrv1_execute</property>
-        <property name="width_request">200</property>
+        <property name="width_request">179</property>
         <property name="height_request">40</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
@@ -137,8 +137,37 @@
         <property name="margin_bottom">30</property>
       </object>
       <packing>
-        <property name="x">349</property>
-        <property name="y">225</property>
+        <property name="x">329</property>
+        <property name="y">253</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkImage" id="dft">
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="pixbuf">dft.jpg</property>
+      </object>
+      <packing>
+        <property name="x">540</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label8">
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_right">6</property>
+        <property name="label" translatable="yes">TUTAJ POWINNY
+SIĘ ZNALEŹĆ WSZYSTKIE
+WSPÓŁCZYNNIKI Z ANALIZY
+PO JEJ WYKONANIU</property>
+      </object>
+      <packing>
+        <property name="x">350</property>
+        <property name="y">117</property>
       </packing>
     </child>
   </object>

@@ -14,7 +14,8 @@ immutable FrequencyType
   VLF::Float64
   ULF::Float64
   LFLH::Float64
-  Widmo::Array{Float64,1}
+  WidmoX::Array{Float64,1}
+  WidmoY::Array{Float64,1}
 end
 
 immutable Poincare
@@ -209,10 +210,12 @@ function FrequencyAnalysis(signal::Array{Float64,1},aproxWindows=2.0,fs=2)
   ULF=0;
   VLF=0;
   LF=0;
+  signalReturnX = [1000];
   signalReturn = [1000];
   for r in 1:length(absFft)
     if(absFft[r]<=0.4)
-        TP=TP+absFft[r]^2;
+      TP=TP+absFft[r]^2;
+      signalReturnX = [ signalReturnX f[r]];
       signalReturn=[signalReturn absFft[r]];
     end
     if(absFft[r]>0.15 && absFft[r]<=0.4)
@@ -228,16 +231,18 @@ function FrequencyAnalysis(signal::Array{Float64,1},aproxWindows=2.0,fs=2)
         ULF=ULF+absFft[r]^2;
     end
   end
+  signalReturnX = signalReturnX[2:end];
   signalReturn = signalReturn[2:length(signalReturn)];
   LFLH = LF/HF;
   #tester return HF+LF+VLF+ULF - TP;
   return FrequencyType(
-      round(TP,1),
+    round(TP,1),
     round(HF,1),
     round(LF,1),
     round(VLF,1),
     round(ULF,1),
     LFLH,
+    signalReturnX,
     signalReturn);
 end
 
