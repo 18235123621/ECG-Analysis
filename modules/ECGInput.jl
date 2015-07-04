@@ -7,12 +7,13 @@ module ECGInput
 export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR , getRRIntervals
 
 type Signal
+    record::String
     data::Array{Float32, 1}
     meta::Dict{String, String}
     anno::Dict{Int, String}
 end
 
-Signal() = Signal([], Dict(), Dict())
+Signal() = Signal("",[], Dict(), Dict())
 
 function loadsignal(record::String, signal::Int=0, time::Any="e")
     data = readcsv(IOBuffer(readall(`wfdb/usr/bin/rdsamp -r $record -c -s $signal -t $time`)), Float32)[:,2]
@@ -27,7 +28,15 @@ function loadsignal(record::String, signal::Int=0, time::Any="e")
        end
     end
     metadict = Dict(map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,1]), map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,2]))
-    Signal(data, metadict, Dict([(0, "START")]))
+    Signal(record,data, metadict, Dict([(0, "START")]))
+end
+
+function loadRpeaksFromAnnotations(signal, time::Any="e")
+    record = signal.record
+    downloadedAnnoLines = readlines(IOBuffer(readall(`wfdb/usr/bin/rdann -r $record -a atr -t $time -p N`)))
+    for i=downloadedAnnoLines
+        signal.anno[int(split(i)[2])] = "R"
+    end
 end
 
 function opensignal(filename::String)
@@ -65,6 +74,15 @@ getQRSend(signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", sign
 
 getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
-getRRIntervals(signal) = []
+function getRRIntervals(signal) 
+    intervals = [0]
+    lastRtime = 0
+    for r = getR(signal)
+        thisRtime = r*(1/getfreq(signal))
+        intervals=[intervals thisRtime-lastRtime ]
+        lastRtime=thisRtime
+    end
+    return intervals[2:end]
+end
 
 end

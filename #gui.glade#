@@ -173,7 +173,7 @@
     <property name="title" translatable="yes">Przetwarzanie sygnałów EKG</property>
     <child>
       <object class="GtkFixed" id="window_fixed">
-        <property name="height_request">700</property>
+        <property name="height_request">697</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>

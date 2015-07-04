@@ -87,7 +87,7 @@ function reload_plot()
     plt.hold(true)
     plot(x, data[xstart:xend])
     grid()
-    handle_R(freq)
+    handle_R(freq,x[1],x[length(x)])
     yMaxAxis=maximum(data[xstart:xend]) + 0.03*maximum(data[xstart:xend])
     yMinAxis=minimum(data[xstart:xend]) - 0.03*minimum(data[xstart:xend])
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
@@ -100,11 +100,10 @@ function reload_plot()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
 end
 
-function handle_R(freq)
-    #todo wyłuskanie indeksów w tej karcie wykresu
+function handle_R(freq,xstart,xend)
     if length(ECGInput.getR(signal))>0 && length(signal.data)>1
-        xR = ECGInput.getR(signal).*(1/freq);
-        yR = signal.data[ECGInput.getR(signal)]
+        xR = filter(val-> (val>xstart && val<xend),ECGInput.getR(signal).*(1/freq));
+        yR = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getR(signal))]
         plot(xR,yR,color="red",marker="o",linewidth=0)
     else
         println("ERROR: handleR() R peaks array is empty");
@@ -113,7 +112,7 @@ end
 
 function reload_poincare_plot(poincare)
 
-    figure(2, figsize=[3, 3], dpi=100, facecolor="#f2f1f0")
+    figure(2, figsize=[3, 3], dpi=60, facecolor="#f2f1f0")
     plot(poincare.RR, poincare.RRy,color="blue",marker="o",linewidth=0)
     title("Poincare plot")
     xlabel("RR [ms]")
@@ -305,6 +304,7 @@ end
 
 include("modules/Baseline_sig.jl");
 include("modules/HRV_sig.jl");
+include("modules/R_peaks_sig.jl");
 
 # WYŚWIETLANIE GUI
 
