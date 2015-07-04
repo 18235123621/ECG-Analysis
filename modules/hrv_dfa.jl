@@ -1,4 +1,7 @@
 module hrv_dfa
+
+export dfa
+
 	function dfa(signal)
 		l = length(signal);
 		RR = signal[1:(l - 1)];

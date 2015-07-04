@@ -11,9 +11,10 @@ type Signal
     data::Array{Float32, 1}
     meta::Dict{String, String}
     anno::Dict{Int, String}
+    time::Any
 end
 
-Signal() = Signal("",[], Dict(), Dict())
+Signal() = Signal("",[], Dict(), Dict(),"e")
 
 function loadsignal(record::String, signal::Int=0, time::Any="e")
     data = readcsv(IOBuffer(readall(`wfdb/usr/bin/rdsamp -r $record -c -s $signal -t $time`)), Float32)[:,2]
@@ -28,11 +29,12 @@ function loadsignal(record::String, signal::Int=0, time::Any="e")
        end
     end
     metadict = Dict(map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,1]), map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,2]))
-    Signal(record,data, metadict, Dict([(0, "START")]))
+    Signal(record,data, metadict, Dict([(0, "START")]),time)
 end
 
-function loadRpeaksFromAnnotations(signal, time::Any="e")
+function loadRpeaksFromAnnotations(signal)
     record = signal.record
+    time  = signal.time
     downloadedAnnoLines = readlines(IOBuffer(readall(`wfdb/usr/bin/rdann -r $record -a atr -t $time -p N`)))
     for i=downloadedAnnoLines
         signal.anno[int(split(i)[2])] = "R"
