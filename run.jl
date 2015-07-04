@@ -62,7 +62,7 @@ function reload_plot()
     end
    
 
-    figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
+    figure(1, figsize=[9, 3], dpi=150, facecolor="#f2f1f0")
 
     xstart = current_page * (items_per_page )
     xend = xstart + (items_per_page )
@@ -83,17 +83,28 @@ function reload_plot()
     end
 
     x = collect(xstart/freq:(1/freq):xend/freq)
-  
+    legendData = ["Sygnal"]
     plt.hold(true)
     plot(x, data[xstart:xend])
     grid()
-    handle_R(freq,x[1],x[length(x)])
+
+    #WAŻNE - OBSŁUGA MODUŁÓW
+    if handle_R(freq,x[1],x[length(x)])
+       legendData = [legendData , "R peak"]
+    end
+    if handle_Waves(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.05*minimum(data[xstart:xend]))
+        legendData = [legendData , "QRS"]
+    end
+    println("$legendData")
+    #WAŻNE - OBSŁUGA MODUŁÓW
+
     yMaxAxis=maximum(data[xstart:xend]) + 0.03*maximum(data[xstart:xend])
-    yMinAxis=minimum(data[xstart:xend]) - 0.03*minimum(data[xstart:xend])
+    yMinAxis=minimum(data[xstart:xend]) - 0.1*minimum(data[xstart:xend])
+
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
     ylabel("voltage [mV]")
-    legend(["Sygnał","R peak"],ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
+    legend(legendData,ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.hold(false)
     plt.close()
@@ -105,8 +116,28 @@ function handle_R(freq,xstart,xend)
         xR = filter(val-> (val>xstart && val<xend),ECGInput.getR(signal).*(1/freq));
         yR = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getR(signal))]
         plot(xR,yR,color="red",marker="o",linewidth=0)
+        return true;
     else
         println("ERROR: handleR() R peaks array is empty");
+        return false;
+    end
+end
+
+function handle_Waves(freq,xstart,xend,y)
+    if length(ECGInput.getQRSonset(signal))>0 && length(ECGInput.getQRSend(signal))==length(ECGInput.getQRSonset(signal)) && length(signal.data)>1
+        qrsOn= filter(val-> (val>xstart && val<xend),ECGInput.getQRSonset(signal).*(1/freq));
+        qrsEnd= filter(val-> (val>xstart && val<xend),ECGInput.getQRSend(signal).*(1/freq));
+        xQRS=[0]
+        yQRS=[0]
+        for i=1:min(length(qrsOn),length(qrsEnd))
+           xQRS = [ECGInput.getQRSonset(signal)[i] ECGInput.getQRSend(signal)[i]].*(1/freq)
+           println("plot $xQRS vs $y")
+           plt.plot(xQRS,[y y],color="green",linestyle="--", linewidth=2.0,marker="o")
+        end
+        return true;
+    else
+        println("ERROR: handle_Waves");
+        return false;
     end
 end
 
