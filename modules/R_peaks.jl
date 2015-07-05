@@ -1,41 +1,61 @@
 module R_peaks
-
 using DSP
-export panTompkins
 
-function panTompkins(signal)
-    #JG: Czy sygnał nie jest czasem już przefiltrowany w Baseline?
-    lowPass = Lowpass(11, fs=200)
-    highPass = Highpass(5, fs=200)
-    butterWorth = Butterworth(2)
-    filterLowPass = digitalfilter(lowPass, butterWorth)
-    filterHighPass = digitalfilter(highPass, butterWorth)
-    lowFiltered = filt(filterLowPass, signal)
-    filtered = filt(filterHighPass, lowFiltered)
+function panTompkins(signal, fs)
+    lowPass = Lowpass(11, fs=fs);
+    highPass = Highpass(5, fs=fs);
+    butterWorth = Butterworth(2);
+    filterLowPass = digitalfilter(lowPass, butterWorth);
+    filterHighPass = digitalfilter(highPass, butterWorth);
+    lowFiltered = filt(filterLowPass, signal);
 
-    y = zeros(length(filtered))
+    filtered = filt(filterHighPass, lowFiltered);
+
+    y = zeros(length(filtered));
     for i = 3:length(filtered)-2
-        y[i] = 1/8.*(-filtered[i-2]-2*filtered[i-1]+2*filtered[i+1]+filtered[i+2])
+        y[i]=1/8.*(-filtered[i-2]-2*filtered[i-1]+2*filtered[i+1]+filtered[i+2]);
     end
-    power = y.^2
-  
-     N=50
-     for i = N:length(power)
-         temp=0
-         for j = 1:N
-             temp = temp + power[i-(N-1)]
-         end  
-         power[i]=temp/N
+    power = y.^2;
+
+    inted = zeros(length(power));
+
+     NN=fs/4;
+     for i = NN:length(power)
+         temp=0;
+         for j = 1:NN
+             temp = temp + power[i-(NN-j)];
+         end
+         inted[i]=temp/NN;
      end
-  
-     threshold=0.015
-     peaks = Int[]
-     for i = 2:length(power)
-        if power[i] >= threshold && power[i-1] < treshold #jeśli pierwsza wartość ponad próg
-            push!(peaks, i) #to zapisz jej nr próbki do wektora peaków R
+
+
+     threshold=mean(inted[1:fs]);
+     r_peaks = 0;
+     values = 0;
+     doing = 0;
+     m = 0;
+     for i = 1:length(inted)
+        if i%fs == 0 && i+fs < length(inted)
+          threshold = mean(inted[i:i+fs]);
         end
+        if inted[i] >= threshold
+	     r_peaks = [r_peaks i];
+	     values = [values inted[i]];
+             doing = 1;
+	     continue;
+         end
+
+	if doing == 1
+	    doing = 0;
+	    ind = indmax(values);
+            m = [m r_peaks[ind]];
+	    values = 0;
+	    r_peaks = 0;
+	end
      end
-     return peaks
+
+
+    return m[2:length(m)]-43;
 end
 
-end #module
+end
