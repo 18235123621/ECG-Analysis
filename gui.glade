@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkFixed" id="baseline_fixed">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="has_tooltip">True</property>
     <child>
       <object class="GtkLabel" id="label2">
         <property name="width_request">50</property>
@@ -494,14 +495,65 @@ PO JEJ WYKONANIU</property>
       <object class="GtkButton" id="waves_execute">
         <property name="label" translatable="yes">Wyznacz</property>
         <property name="width_request">200</property>
+        <property name="height_request">31</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="resize_mode">queue</property>
       </object>
       <packing>
-        <property name="x">20</property>
-        <property name="y">15</property>
+        <property name="x">19</property>
+        <property name="y">124</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label9">
+        <property name="width_request">237</property>
+        <property name="height_request">29</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Wielkość elementu strukturalnego: </property>
+      </object>
+      <packing>
+        <property name="x">27</property>
+        <property name="y">29</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label10">
+        <property name="width_request">95</property>
+        <property name="height_request">23</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">dstep: </property>
+      </object>
+      <packing>
+        <property name="x">7</property>
+        <property name="y">72</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="b_wielkosc_elementu_strukturalnego">
+        <property name="width_request">166</property>
+        <property name="height_request">29</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+      </object>
+      <packing>
+        <property name="x">266</property>
+        <property name="y">29</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="b_dstep">
+        <property name="width_request">166</property>
+        <property name="height_request">29</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+      </object>
+      <packing>
+        <property name="x">90</property>
+        <property name="y">71</property>
       </packing>
     </child>
   </object>
