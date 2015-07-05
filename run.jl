@@ -304,6 +304,9 @@ function reload_poincare_plot(poincare)
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),poincareView,bytestring ("poincare.jpg"))
 end
 
+function reload_dfa_plot(data)
+end
+
 function reload_dft_plot(oX,oY)
     figure(3, figsize=[6, 3], dpi=60, facecolor="#f2f1f0")
     plot(oX, oY,color="red",linewidth=1)
