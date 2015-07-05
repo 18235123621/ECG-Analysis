@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkFixed" id="baseline_fixed">
@@ -115,8 +115,8 @@
     <property name="can_focus">False</property>
     <child>
       <object class="GtkImage" id="poincare">
-        <property name="width_request">100</property>
-        <property name="height_request">80</property>
+        <property name="width_request">400</property>
+        <property name="height_request">400</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="pixbuf">poincare.jpg</property>
@@ -126,19 +126,14 @@
       <object class="GtkButton" id="hrv1_execute">
         <property name="label" translatable="yes">Wykonaj</property>
         <property name="name">hrv1_execute</property>
-        <property name="width_request">179</property>
-        <property name="height_request">40</property>
+        <property name="width_request">80</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="margin_left">30</property>
-        <property name="margin_right">30</property>
-        <property name="margin_top">30</property>
-        <property name="margin_bottom">30</property>
       </object>
       <packing>
-        <property name="x">329</property>
-        <property name="y">253</property>
+        <property name="x">420</property>
+        <property name="y">5</property>
       </packing>
     </child>
     <child>
@@ -156,18 +151,19 @@
     <child>
       <object class="GtkLabel" id="label8">
         <property name="width_request">100</property>
-        <property name="height_request">80</property>
+        <property name="height_request">250</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_right">6</property>
         <property name="label" translatable="yes">TUTAJ POWINNY
-SIĘ ZNALEŹĆ WSZYSTKIE
-WSPÓŁCZYNNIKI Z ANALIZY
+SIĘ ZNALEŹĆ
+WSZYSTKIE
+WSPÓŁCZYNNIKI
+Z ANALIZY
 PO JEJ WYKONANIU</property>
       </object>
       <packing>
-        <property name="x">350</property>
-        <property name="y">117</property>
+        <property name="x">410</property>
+        <property name="y">60</property>
       </packing>
     </child>
   </object>
@@ -177,17 +173,25 @@ PO JEJ WYKONANIU</property>
     <child>
       <object class="GtkButton" id="hrvdfa_execute">
         <property name="label" translatable="yes">Wyznacz</property>
-        <property name="width_request">200</property>
-        <property name="height_request">35</property>
+        <property name="width_request">80</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="resize_mode">queue</property>
       </object>
       <packing>
-        <property name="x">20</property>
-        <property name="y">15</property>
+        <property name="x">420</property>
+        <property name="y">5</property>
       </packing>
+    </child>
+    <child>
+      <object class="GtkImage" id="dfa">
+        <property name="width_request">400</property>
+        <property name="height_request">400</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="pixbuf">dfa.jpg</property>
+      </object>
     </child>
   </object>
   <object class="GtkImage" id="image1">
@@ -490,7 +494,6 @@ PO JEJ WYKONANIU</property>
       <object class="GtkButton" id="waves_execute">
         <property name="label" translatable="yes">Wyznacz</property>
         <property name="width_request">200</property>
-        <property name="height_request">35</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>

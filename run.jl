@@ -305,6 +305,15 @@ function reload_poincare_plot(poincare)
 end
 
 function reload_dfa_plot(data)
+    figure(6, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
+    plot(collect([1:length(data)]), data,color="red",linewidth=1)
+    title("DFA plot")
+    xlabel("N")
+    ylabel("DFA")
+    grid()
+    savefig("dfa.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dfaView,bytestring ("dfa.jpg"))
 end
 
 function reload_dft_plot(oX,oY)
@@ -368,6 +377,7 @@ window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
 poincareView = GAccessor.object(builder_main,"poincare")
 dftView = GAccessor.object(builder_main,"dft")
+dfaView = GAccessor.object(builder_main,"dfa")
 
 # Okna modułów
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
