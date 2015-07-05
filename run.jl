@@ -85,18 +85,17 @@ function reload_plot()
     x = collect(xstart/freq:(1/freq):xend/freq)
     legendData = ["Sygnal"]
     plt.hold(true)
-    plot(x, data[xstart:xend])
+    plot(x, data[xstart:xend],label="Signal")
     grid()
 
     #WAŻNE - OBSŁUGA MODUŁÓW
-    if handle_R(freq,x[1],x[length(x)])
-       legendData = [legendData , "R peak"]
-    end
-    if handle_QRS(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
-        legendData = [legendData , "QRS"]
-    end
-    println("$legendData")
-    #WAŻNE - OBSŁUGA MODUŁÓW
+    handle_R(freq,x[1],x[length(x)])
+
+    handle_QRS(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+
+    handle_P(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+
+    #WAŻNE - OBSŁUGA MODUŁÓW END
 
     yMaxAxis=maximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
     yMinAxis=minimum(data[xstart:xend]) - 0.1*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
@@ -104,7 +103,7 @@ function reload_plot()
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
     ylabel("voltage [mV]")
-    legend(legendData,ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
+    legend(ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.hold(false)
     plt.close()
@@ -115,7 +114,7 @@ function handle_R(freq,xstart,xend)
     if length(ECGInput.getR(signal))>0 && length(signal.data)>1
         xR = filter(val-> (val>xstart && val<xend),ECGInput.getR(signal).*(1/freq));
         yR = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getR(signal))]
-        plot(xR,yR,color="red",marker="o",linewidth=0)
+        plot(xR,yR,color="red",marker="o",linewidth=0,label="R")
         return true;
     else
         println("ERROR: handleR() R peaks array is empty");
@@ -132,6 +131,71 @@ function handle_QRS(freq,xstart,xend,y)
         endLen=length(qrsEnd)
 
         iModif= onLen < endLen ? 1:0
+        labelCalled=false;
+        iEnd = onLen < endLen ? endLen-1 : onLen
+        if onLen==endLen
+            iEnd = onLen
+        elseif onLen>endLen
+            iEnd = endLen
+        elseif onLen<endLen
+            iEnd = onLen
+        end
+        for i= 1 : iEnd
+            xQRS = (collect( [qrsOn[i] qrsEnd[i+iModif] ] ))
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            if i==1
+                labelCalled=true
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-",label="QRS")
+            else
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            end
+        end
+       
+        #brzegi wykresu
+        if length(qrsOn) > length(qrsEnd) && length(qrsOn)>0
+            xQRS = collect([qrsOn[length(qrsOn)] xend])
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            if labelCalled==true
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            else
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-",label="QRS")
+                labelCalled=true;
+            end
+        end
+
+        if length(qrsOn) < length(qrsEnd) && length(qrsEnd)>0
+            xQRS = collect([ xstart qrsEnd[1] ])
+            println("xQRS 2 = $xQRS")
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            if labelCalled==true
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            else
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-",label="QRS")
+                labelCalled=true;
+            end
+        end
+        #brzegi wykresu
+        return true;
+    else
+        println("ERROR: handle_Waves");
+        return false;
+    end
+end
+
+function handle_P(freq,xstart,xend,y)
+    println("handle_P")
+    if length(ECGInput.getPonset(signal))>0 && length(ECGInput.getPend(signal))==length(ECGInput.getPonset(signal)) && length(signal.data)>1
+
+        pOn= filter(val-> (val>xstart && val<xend),ECGInput.getPonset(signal).*(1/freq));
+        pEnd= filter(val-> (val>xstart && val<xend),ECGInput.getPend(signal).*(1/freq));
+        onLen=length(pOn)
+        endLen=length(pEnd)
+        labelCalled=false;
+
+        iModif= onLen < endLen ? 1:0
 
         iEnd = onLen < endLen ? endLen-1 : onLen
         if onLen==endLen
@@ -141,41 +205,48 @@ function handle_QRS(freq,xstart,xend,y)
         elseif onLen<endLen
             iEnd = onLen
         end
-        println("xstart= $xstart xend=$xend  iend= $iEnd onLen=$onLen endLen=$endLen")
+        println("1 pętla iEnd=$iEnd")
         for i= 1 : iEnd
-            println("i= $i")
-            xQRS = (collect( [qrsOn[i] qrsEnd[i+iModif] ] ))
-            println("after QRS init")
-            yV=zeros(xQRS)
+            xP = (collect( [pOn[i] pEnd[i+iModif] ] ))
+            yV=zeros(xP)
             fill!(yV,y)
-            plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            if i==1
+                labelCalled=true;
+                plt.plot(xP, yV,color="yellow",label="P", linewidth=1.0,"b^-")
+            else 
+                plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
+            end
         end
-       
+       println("1 brzegi")
         #brzegi wykresu
-        if length(qrsOn) > length(qrsEnd) && length(qrsOn)>0
-            println("xEND 1 = $xend")
-            xQRS = collect([qrsOn[length(qrsOn)] xend])
-            println("xQRS 1 = $xQRS")
-            yV=zeros(xQRS)
+        if length(pOn) > length(pEnd) && length(pOn)>0
+            xP = collect([pOn[length(pOn)] xend])
+            yV=zeros(xP)
             fill!(yV,y)
-            plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            if labelCalled==true
+                plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
+            else
+                plt.plot(xP, yV,color="yellow",label="P", linewidth=1.0,"b^-")
+                labelCalled=true;
+            end
         end
-
-        if length(qrsOn) < length(qrsEnd) && length(qrsEnd)>0
-            println("xstart 2 = $xstart")
-            xQRS = collect([ xstart qrsEnd[1] ])
-            println("xQRS 2 = $xQRS")
-            yV=zeros(xQRS)
+   println("2 brzegi")
+        if length(pOn) < length(pEnd) && length(pEnd)>0
+            xP = collect([ xstart pEnd[1] ])
+            println("xP 2 = $xP")
+            yV=zeros(xP)
             fill!(yV,y)
-            plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            if labelCalled==true
+                plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
+            else
+                plt.plot(xP, yV,color="yellow",label="P", linewidth=1.0,"b^-")
+                labelCalled=true;
+            end
         end
         #brzegi wykresu
-       
-        #println("xQRS=$xQRS , y=$y")
-    
         return true;
     else
-        println("ERROR: handle_Waves");
+        println("ERROR: handle_P");
         return false;
     end
 end

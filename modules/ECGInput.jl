@@ -66,15 +66,17 @@ getfreq(signal) = int(split(signal.meta["Sampling frequency"])[1])
 
 #getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
 
-getPonset(signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
+getPonset(signal) = [300 600 1250 1900 2640]#= DANE TESTOWE NIE KASOWAĆ!=#
+# sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
 
-getPend(signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
+getPend(signal) = [320 620 1300 2080 2660] #==#
+# sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
 
-getQRSonset(signal) = #=[340 640 1250 1900 2680] DANE TESTOWE NIE KASOWAĆ!=#
-sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
+getQRSonset(signal) = [340 640 1250 1900 2680]#= DANE TESTOWE NIE KASOWAĆ!=#
+#sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
 
-getQRSend(signal) = #=[390 690 1300 2080 2730] =#
-sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
+getQRSend(signal) = [390 690 1300 2180 2730] #==#
+#sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
 getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
