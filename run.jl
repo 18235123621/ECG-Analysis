@@ -62,7 +62,7 @@ function reload_plot()
     end
    
 
-    figure(1, figsize=[9, 3], dpi=150, facecolor="#f2f1f0")
+    figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
 
     xstart = current_page * (items_per_page )
     xend = xstart + (items_per_page )
@@ -87,14 +87,15 @@ function reload_plot()
     plt.hold(true)
     plot(x, data[xstart:xend],label="Signal")
     grid()
-
+    useSimpleMode= true
     #WAŻNE - OBSŁUGA MODUŁÓW
     handle_R(freq,x[1],x[length(x)])
 
-    handle_QRS(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+    handle_QRS(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.04*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))),useSimpleMode)
 
-    handle_P(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+    handle_P(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.04*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))),useSimpleMode)
 
+    handle_T(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.04*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))),useSimpleMode)
     #WAŻNE - OBSŁUGA MODUŁÓW END
 
     yMaxAxis=maximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
@@ -103,7 +104,7 @@ function reload_plot()
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
     ylabel("voltage [mV]")
-    legend(ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
+    legend(ncol=3,loc=9,bbox_to_anchor=[0.5,1.3]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.hold(false)
     plt.close()
@@ -122,10 +123,13 @@ function handle_R(freq,xstart,xend)
     end
 end
 
-function handle_QRS(freq,xstart,xend,y)
-    if length(ECGInput.getQRSonset(signal))>0 && length(ECGInput.getQRSend(signal))==length(ECGInput.getQRSonset(signal)) && length(signal.data)>1
+function handle_QRS(freq,xstart,xend,y,simple)
+    if length(ECGInput.getQRSonset(signal))>0 && length(ECGInput.getQRSend(signal))==length(ECGInput.getQRSonset(signal)) && length(signal.data)>1 && simple==false
 
         qrsOn= filter(val-> (val>xstart && val<xend),ECGInput.getQRSonset(signal).*(1/freq));
+
+
+
         qrsEnd= filter(val-> (val>xstart && val<xend),ECGInput.getQRSend(signal).*(1/freq));
         onLen=length(qrsOn)
         endLen=length(qrsEnd)
@@ -179,15 +183,45 @@ function handle_QRS(freq,xstart,xend,y)
         end
         #brzegi wykresu
         return true;
+    elseif  length(ECGInput.getQRSonset(signal))>0  && length(signal.data)>1 && simple==true
+        xOn = filter(val-> (val>xstart && val<xend),ECGInput.getQRSonset(signal).*(1/freq));
+        yOn = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getQRSonset(signal))]
+        plot(xOn,yOn,color="green",marker="o",linewidth=0,label="QRS_onset")
+        xOff= filter(val-> (val>xstart && val<xend),ECGInput.getQRSend(signal).*(1/freq));
+        yOff = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getQRSend(signal))]
+        plot(xOff,yOff,color="#44D6ED",marker="o",linewidth=0,label="QRS_end")
+        return true;
+
     else
         println("ERROR: handle_Waves");
         return false;
     end
 end
 
-function handle_P(freq,xstart,xend,y)
-    println("handle_P")
-    if length(ECGInput.getPonset(signal))>0 && length(ECGInput.getPend(signal))==length(ECGInput.getPonset(signal)) && length(signal.data)>1
+function handle_T(freq,xstart,xend,y,simple)
+    if length(ECGInput.getTend(signal))>0 && length(signal.data)>1  && simple==false
+        tEnd= filter(val-> (val>xstart && val<xend),ECGInput.getTend(signal).*(1/freq));
+        labelCalled=false
+        for i=1:length(tEnd)
+            if labelCalled==true
+                plt.plot(tEnd[i], y,color="cyan", linewidth="0", marker="^")
+            else
+                plt.plot(tEnd[i], y,color="cyan",label="Tend",linewidth="0", marker="^")
+                labelCalled=true;
+            end
+        end
+    elseif  length(ECGInput.getTend(signal))>0 && length(signal.data)>1  && simple==true
+        xOn = filter(val-> (val>xstart && val<xend),ECGInput.getTend(signal).*(1/freq));
+        yOn = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getTend(signal))]
+        plot(xOn,yOn,color="#ED44E7",marker="o",linewidth=0,label="T_end")
+    else
+        println("ERROR: handle_T")
+        return false;
+    end
+end
+
+function handle_P(freq,xstart,xend,y,simple)
+    if length(ECGInput.getPonset(signal))>0 && length(ECGInput.getPend(signal))==length(ECGInput.getPonset(signal)) && length(signal.data)>1 && simple==false
 
         pOn= filter(val-> (val>xstart && val<xend),ECGInput.getPonset(signal).*(1/freq));
         pEnd= filter(val-> (val>xstart && val<xend),ECGInput.getPend(signal).*(1/freq));
@@ -205,7 +239,6 @@ function handle_P(freq,xstart,xend,y)
         elseif onLen<endLen
             iEnd = onLen
         end
-        println("1 pętla iEnd=$iEnd")
         for i= 1 : iEnd
             xP = (collect( [pOn[i] pEnd[i+iModif] ] ))
             yV=zeros(xP)
@@ -217,7 +250,6 @@ function handle_P(freq,xstart,xend,y)
                 plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
             end
         end
-       println("1 brzegi")
         #brzegi wykresu
         if length(pOn) > length(pEnd) && length(pOn)>0
             xP = collect([pOn[length(pOn)] xend])
@@ -230,7 +262,6 @@ function handle_P(freq,xstart,xend,y)
                 labelCalled=true;
             end
         end
-   println("2 brzegi")
         if length(pOn) < length(pEnd) && length(pEnd)>0
             xP = collect([ xstart pEnd[1] ])
             println("xP 2 = $xP")
@@ -245,6 +276,14 @@ function handle_P(freq,xstart,xend,y)
         end
         #brzegi wykresu
         return true;
+    elseif  length(ECGInput.getPonset(signal))>0  && length(signal.data)>1 && simple==true
+        xOn = filter(val-> (val>xstart && val<xend),ECGInput.getPonset(signal).*(1/freq));
+        yOn = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getPonset(signal))]
+        plot(xOn,yOn,color="#99C930",marker="o",linewidth=0,label="P_onset")
+        xOff= filter(val-> (val>xstart && val<xend),ECGInput.getPend(signal).*(1/freq));
+        yOff = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getPend(signal))]
+        plot(xOff,yOff,color="yellow",marker="o",linewidth=0,label="P_end")
+        return true;
     else
         println("ERROR: handle_P");
         return false;
@@ -253,7 +292,7 @@ end
 
 function reload_poincare_plot(poincare)
 
-    figure(2, figsize=[3, 3], dpi=60, facecolor="#f2f1f0")
+    figure(2, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
     plot(poincare.RR, poincare.RRy,color="blue",marker="o",linewidth=0)
     title("Poincare plot")
     xlabel("RR [ms]")

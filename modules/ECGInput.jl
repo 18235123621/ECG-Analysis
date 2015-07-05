@@ -4,7 +4,7 @@ module ECGInput
 #Loads a signal record of given name and optionally given signal number and duration
 #More info: http://www.physionet.org/physiotools/wag/intro.htm
 
-export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR , getRRIntervals
+export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR , getRRIntervals , getTend
 
 type Signal
     record::String
@@ -66,19 +66,22 @@ getfreq(signal) = int(split(signal.meta["Sampling frequency"])[1])
 
 #getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
 
-getPonset(signal) =  #=[300 600 1250 1900 2640] DANE TESTOWE NIE KASOWAĆ!=#
+getPonset(signal) = #= [300 600 1250  2640] DANE TESTOWE NIE KASOWAĆ!=#
  sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
 
-getPend(signal) =  #=[320 620 1300 2080 2660] =#
+getPend(signal) =  #=[320 620 1300  2660] =#
  sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
 
-getQRSonset(signal) = #= [340 640 1250 1900 2680] DANE TESTOWE NIE KASOWAĆ!=#
+getQRSonset(signal) = #=[340 640 1250 1900 2680]  DANE TESTOWE NIE KASOWAĆ!=#
 sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
 
-getQRSend(signal) = #= [390 690 1300 2180 2730]=#
+getQRSend(signal) = #=[390 690 1300 2180 2730] =#
 sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
 getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
+
+getTend(signal) = #=[420 730 1350]=#
+sort(collect(keys(filter((key, val) -> val == "Tend", signal.anno))))
 
 function getRRIntervals(signal) 
     intervals = [0]
