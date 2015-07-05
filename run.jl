@@ -425,8 +425,10 @@ end
 # Suwak w prawo
 sig_move_right = signal_connect(GAccessor.object(builder_main,"move_right"), :clicked) do widget
     global current_page
-    current_page = current_page + 1
-    reload_plot()
+    if length(signal.data) > current_page * (items_per_page ) + (items_per_page ) 
+        current_page = current_page + 1
+        reload_plot()
+    end
 end
 
 # Otwarcie okna zmiany rozdzielczosci wykresu
