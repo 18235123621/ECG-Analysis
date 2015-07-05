@@ -1,0 +1,26 @@
+function read_file(f::IOStream)
+	lines = readlines(f);
+	counter = 1
+	for l in lines
+   		counter += 1
+	end
+	val = zeros(counter)
+	counter=1;
+	for l in lines
+   		val[counter]=parse(replace(strip(l),",","."));
+		counter+=1;
+	end
+	return val;
+end
+
+#f=open("C:/Users/x220/Desktop/sygnaly/chf206.txt")
+f=open("C:/Users/x220/Desktop/sygnaly/nsr001.txt")
+
+val = read_file(f::IOStream);
+include("C:/Users/x220/Desktop/sygnaly/HRV.jl");
+
+#val = val[1: 30000];
+
+@time freq = HRV.FrequencyAnalysis(val,2,2)
+@time timeDomain = HRV.TimeDomainAnalysis(val,50,50)
+@time poincare = HRV.PoincareAnalysis(val)

@@ -4,21 +4,41 @@ module ECGInput
 #Loads a signal record of given name and optionally given signal number and duration
 #More info: http://www.physionet.org/physiotools/wag/intro.htm
 
-export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR
+export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR, getRRIntervals, setPonset, setPend, setQRSonset, setQRSend, setR
 
 type Signal
+    record::String
     data::Array{Float32, 1}
     meta::Dict{String, String}
     anno::Dict{Int, String}
+    time::Any
 end
 
-Signal() = Signal([], Dict(), Dict())
+Signal() = Signal("", [], Dict(), Dict(), "e")
 
 function loadsignal(record::String, signal::Int=0, time::Any="e")
     data = readcsv(IOBuffer(readall(`wfdb/usr/bin/rdsamp -r $record -c -s $signal -t $time`)), Float32)[:,2]
     meta = readdlm(IOBuffer(readall(`wfdb/usr/bin/wfdbdesc $record`)), ':', String)
-    metadict = Dict(map(lstrip, meta[7:21,1]), map(lstrip, meta[7:21,2]))
-    Signal(data, metadict, Dict([(0, "START")]))
+    startingTimeIndex = 8
+    for i = 1:length(meta)
+       if isdefined(meta, i)
+          if meta[i,1] == "Starting time"
+             startingTimeIndex = i
+             break
+          end
+       end
+    end
+    metadict = Dict(map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,1]), map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,2]))
+    Signal(record, data, metadict, Dict([(0, "START")]), time)
+end
+
+function loadRpeaks(signal::Signal)
+    record = signal.record
+    time  = signal.time
+    downloadedAnnoLines = readlines(IOBuffer(readall(`wfdb/usr/bin/rdann -r $record -a atr -t $time -p N`)))
+    for i = downloadedAnnoLines
+        signal.anno[int(split(i)[2])] = "R"
+    end
 end
 
 function opensignal(filename::String)
@@ -36,24 +56,43 @@ function savesignal(filename::String, signal::Signal)
     writecsv("$(filename)_anno.csv", signal.anno)
 end
 
+getgain(signal::Signal) = int(split(signal.meta["Gain"])[1])
+
 getres(signal::Signal) = int(split(signal.meta["ADC resolution"])[1])
 
-function getfreq(signal)
-   return int(split(signal.meta["Sampling frequency"])[1]);
-end
+getfreq(signal::Signal) = int(split(signal.meta["Sampling frequency"])[1])
 
+getPonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno)))) #=[300 600 1250 1900 2640] DANE TESTOWE NIE KASOWAĆ!=#
 
+getPend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno)))) #=[320 620 1300 2080 2660] =#
 
-getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
+getQRSonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno)))) #= [340 640 1250 1900 2680] DANE TESTOWE NIE KASOWAĆ!=#
 
-getPonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
-
-getPend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
-
-getQRSonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
-
-getQRSend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
+getQRSend(signal::Signal) = #= [390 690 1300 2180 2730]=#
+sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
 getR(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
+function getRRIntervals(signal::Signal) 
+    intervals = Float32[]
+    lastRtime = 0
+    freq = getfreq(signal)
+    for r = getR(signal)
+        thisRtime = r * (1.0/freq)
+        push!(intervals, thisRtime - lastRtime)
+        lastRtime = thisRtime
+    end
+    return intervals
 end
+
+setR(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
+
+setPonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
+
+setPend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
+
+setQRSonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
+
+setQRSend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
+
+end #module

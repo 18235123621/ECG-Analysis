@@ -1,7 +1,7 @@
 
 println("\n\n#############################################");
 println("#");
-println("# Przetwarzanie sygnałów 2015 wersja 0.1");
+println("# Przetwarzanie sygnałów 2015 wersja 0.2");
 println("#");
 println("#############################################\n");
 
@@ -21,18 +21,19 @@ using PyPlot # http://matplotlib.org/api/pyplot_summary.html
 pygui(false)
 
 # ŁADOWANIE MODUŁÓW DO PRZETWARZANIA SYGNAŁU
-
-include("modules/ECGInput.jl")
-include("modules/Baseline.jl")
-include("modules/Waves.jl")
-include("modules/HRV.jl")
-include("modules/hrv_dfa.jl")
+# Konwencja: moduły zaczynamy z wielkiej litery, jak klasy
+reload("modules/ECGInput.jl")
+reload("modules/Baseline.jl")
+reload("modules/Waves.jl")
+reload("modules/HRV.jl")
+reload("modules/HRV_DFA.jl")
+reload("modules/R_peaks.jl")
 using ECGInput
 using Baseline
+using R_peaks
 using Waves
 using HRV
 using HRV_DFA
-
 # INICJALIZACJA PODSTAWOWYCH ZMIENNYCH GLOBALNYCH
 
 current_page = 0
@@ -57,15 +58,12 @@ function reload_plot()
     end
 
     if datalength>1
-       freq = ECGInput.getfreq(signal);
-       println("Freq = $freq");
+       freq = getfreq(signal);
     else
        freq =1;
-       println("ERROR Freq = $freq");
     end
-   
 
-    figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
+    figure(1, figsize=[9, 3], dpi=150, facecolor="#f2f1f0")
 
     xstart = current_page * (items_per_page )
     xend = xstart + (items_per_page )
@@ -86,13 +84,196 @@ function reload_plot()
     end
 
     x = collect(xstart/freq:(1/freq):xend/freq)
-    plot(x, data[xstart:xend])
-    axis([xstart/freq , xend/freq , minimum(data[xstart:xend]), maximum(data[xstart:xend])])
+    legendData = ["Sygnal"]
+    plt.hold(true)
+    plot(x, data[xstart:xend], label="Signal")
+    grid()
+
+    #WAŻNE - OBSŁUGA MODUŁÓW
+    handle_R(freq,x[1],x[length(x)])
+
+    handle_QRS(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+
+    handle_P(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+    #WAŻNE - OBSŁUGA MODUŁÓW END
+
+    yMaxAxis=maximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
+    yMinAxis=minimum(data[xstart:xend]) - 0.1*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
+
+    axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
-    ylabel("voltage (mV)")
+    ylabel("voltage [mV]")
+    legend(ncol=4,loc=9,bbox_to_anchor=[0.5,1.25]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.hold(false)
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),wykres,bytestring("wykres.jpg"))
+end
+
+function handle_R(freq, xstart, xend)
+    if length(ECGInput.getR(signal)) > 0 && length(signal.data) > 1
+        xR = filter(val-> (val>xstart && val<xend),ECGInput.getR(signal).*(1/freq));
+        yR = signal.data[filter(r->(r>xstart*freq && r<xend*freq),ECGInput.getR(signal))]
+        plot(xR,yR,color="red",marker="o",linewidth=0,label="R")
+        return true;
+    else
+        println("ERROR: handleR() R peaks array is empty");
+        return false;
+    end
+end
+
+function handle_QRS(freq, xstart, xend, y)
+    if length(ECGInput.getQRSonset(signal)) > 0 && length(ECGInput.getQRSend(signal)) == length(ECGInput.getQRSonset(signal)) && length(signal.data) > 1
+
+        qrsOn= filter(val-> (val>xstart && val<xend),ECGInput.getQRSonset(signal).*(1/freq));
+        qrsEnd= filter(val-> (val>xstart && val<xend),ECGInput.getQRSend(signal).*(1/freq));
+        onLen=length(qrsOn)
+        endLen=length(qrsEnd)
+
+        iModif= onLen < endLen ? 1:0
+        labelCalled=false;
+        iEnd = onLen < endLen ? endLen-1 : onLen
+        if onLen==endLen
+            iEnd = onLen
+        elseif onLen>endLen
+            iEnd = endLen
+        elseif onLen<endLen
+            iEnd = onLen
+        end
+        for i= 1 : iEnd
+            xQRS = (collect( [qrsOn[i] qrsEnd[i+iModif] ] ))
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            if i==1
+                labelCalled=true
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-",label="QRS")
+            else
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            end
+        end
+       
+        #brzegi wykresu
+        if length(qrsOn) > length(qrsEnd) && length(qrsOn) > 0
+            xQRS = collect([qrsOn[length(qrsOn)] xend])
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            if labelCalled==true
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            else
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-",label="QRS")
+                labelCalled=true;
+            end
+        end
+
+        if length(qrsOn) < length(qrsEnd) && length(qrsEnd) > 0
+            xQRS = collect([ xstart qrsEnd[1] ])
+            println("xQRS 2 = $xQRS")
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            if labelCalled==true
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+            else
+                plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-",label="QRS")
+                labelCalled=true;
+            end
+        end
+        #brzegi wykresu
+        return true;
+    else
+        println("ERROR: handle_Waves");
+        return false;
+    end
+end
+
+function handle_P(freq, xstart, xend, y)
+    println("handle_P")
+    if length(ECGInput.getPonset(signal)) > 0 && length(ECGInput.getPend(signal)) == length(ECGInput.getPonset(signal)) && length(signal.data) > 1
+
+        pOn = filter(val-> (val>xstart && val<xend),ECGInput.getPonset(signal).*(1/freq));
+        pEnd = filter(val-> (val>xstart && val<xend),ECGInput.getPend(signal).*(1/freq));
+        onLen = length(pOn)
+        endLen = length(pEnd)
+        labelCalled = false;
+
+        iModif = onLen < endLen ? 1:0
+
+        iEnd = onLen < endLen ? endLen-1 : onLen
+        if onLen==endLen
+            iEnd = onLen
+        elseif onLen>endLen
+            iEnd = endLen
+        elseif onLen<endLen
+            iEnd = onLen
+        end
+        println("1 pętla iEnd=$iEnd")
+        for i= 1 : iEnd
+            xP = (collect( [pOn[i] pEnd[i+iModif] ] ))
+            yV=zeros(xP)
+            fill!(yV,y)
+            if i==1
+                labelCalled=true;
+                plt.plot(xP, yV,color="yellow",label="P", linewidth=1.0,"b^-")
+            else 
+                plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
+            end
+        end
+       println("1 brzegi")
+        #brzegi wykresu
+        if length(pOn) > length(pEnd) && length(pOn)>0
+            xP = collect([pOn[length(pOn)] xend])
+            yV=zeros(xP)
+            fill!(yV,y)
+            if labelCalled==true
+                plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
+            else
+                plt.plot(xP, yV,color="yellow",label="P", linewidth=1.0,"b^-")
+                labelCalled=true;
+            end
+        end
+   println("2 brzegi")
+        if length(pOn) < length(pEnd) && length(pEnd)>0
+            xP = collect([ xstart pEnd[1] ])
+            println("xP 2 = $xP")
+            yV=zeros(xP)
+            fill!(yV,y)
+            if labelCalled==true
+                plt.plot(xP, yV,color="yellow", linewidth=1.0,"b^-")
+            else
+                plt.plot(xP, yV,color="yellow",label="P", linewidth=1.0,"b^-")
+                labelCalled=true;
+            end
+        end
+        #brzegi wykresu
+        return true;
+    else
+        println("ERROR: handle_P");
+        return false;
+    end
+end
+
+function reload_poincare_plot(poincare)
+    figure(2, figsize=[3, 3], dpi=60, facecolor="#f2f1f0")
+    plot(poincare.RR, poincare.RRy,color="blue",marker="o",linewidth=0)
+    title("Poincare plot")
+    xlabel("RR [ms]")
+    ylabel("RR j+1 [ms]")
+    grid()
+    savefig("poincare.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),poincareView,bytestring ("poincare.jpg"))
+end
+
+function reload_dft_plot(oX,oY)
+    figure(3, figsize=[6, 3], dpi=60, facecolor="#f2f1f0")
+    plot(oX, oY,color="red",linewidth=1)
+    title("DFT")
+    xlabel("Częstotliwość")
+    ylabel("|Y(f)|")
+    grid()
+    savefig("dft.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dftView,bytestring ("dft.jpg"))
+
 end
 
 function refresh_fs()
@@ -114,17 +295,15 @@ function clear_workspace()
     if hasparent(r_peaks_fixed)
         delete!(modules, r_peaks_fixed)
     end
-    #= TODO: podłączyć pozostałe moduły
     if hasparent(waves_fixed)
         delete!(modules, waves_fixed)
     end
     if hasparent(hrv_dfa_fixed)
-        delete!(modules, hrv_dfa_fixed)
+        delete!(modules, hrv_dfa_fixed)  
     end
     if hasparent(hrv1_fixed)
         delete!(modules, hrv1_fixed)
     end
-    =#
 end
 
 # TWORZENIE BUILDERÓW DLA WSZYSTKICH GUI
@@ -143,13 +322,15 @@ modules = GAccessor.object(builder_main,"modules")
 window_change_resolution = GAccessor.object(builder_main,"window_change_resolution");
 window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
+poincareView = GAccessor.object(builder_main,"poincare")
+dftView = GAccessor.object(builder_main,"dft")
 
 # Okna modułów
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
 r_peaks_fixed = GAccessor.object(builder_main,"r_peaks_fixed")
-waves_fixed = null #TODO: dodać w gui.glade
-hrv_dfa_fixed = null #TODO: dodać w gui.glade
-hrv1_fixed = null #TODO: dodać w gui.glade
+waves_fixed = GAccessor.object(builder_main,"waves_fixed")
+hrv_dfa_fixed = GAccessor.object(builder_main,"hrv_dfa_fixed")
+hrv1_fixed = GAccessor.object(builder_main,"hrv1_fixed")
 
 reload_plot()
 # ccall((:gtk_window_set_keep_above,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Cint),MainWindow,1) # dzieki temu okno pojawia sie na gorze wszystkich okien, nie jest zminimalizowane
@@ -229,6 +410,7 @@ sig_button_loadsignal = signal_connect(GAccessor.object(builder_main,"button_loa
     seconds = getproperty(GAccessor.object(builder_main,"seconds"), :text, String)
     signalNo = 0
     signal = loadsignal(record, signalNo, seconds)
+    signal.data = signal.data./ECGInput.getGain(signal)
     hide_window(window_load_params)
     println("Załadowano rekord PhysioBank: $record")
     println("Metadane:")
@@ -249,7 +431,6 @@ sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_r_peaks"),
     push!(modules, r_peaks_fixed)
 end
 
-#= TODO: podłączyć pozostałe moduły
 # Ładowanie modułu Waves
 sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_waves"), :clicked) do widget
     clear_workspace()
@@ -257,7 +438,7 @@ sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_waves"), :
 end
 
 # Ładowanie modułu HRV1
-sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv1"), :clicked) do widget
+sig_menu_hrv1 = signal_connect(GAccessor.object(builder_main,"menu_hrv1"), :clicked) do widget
     clear_workspace()
     push!(modules, hrv1_fixed)
 end
@@ -267,11 +448,14 @@ sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv_dfa"),
     clear_workspace()
     push!(modules, hrv_dfa_fixed)
 end
-=#
 
 # PRZEKAZANIE SYGNAŁU DO MODUŁÓW
 
 include("modules/Baseline_sig.jl");
+include("modules/R_peaks_sig.jl");
+include("modules/HRV_sig.jl");
+include("modules/HRV_DFA_sig.jl");
+include("modules/Waves_sig.jl");
 
 # WYŚWIETLANIE GUI
 

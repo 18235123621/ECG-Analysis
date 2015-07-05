@@ -54,6 +54,7 @@
         <property name="receives_default">True</property>
         <property name="resize_mode">immediate</property>
         <property name="xalign">0.52999997138977051</property>
+        <property name="yalign">0.43999999761581421</property>
       </object>
       <packing>
         <property name="x">130</property>
@@ -106,6 +107,86 @@
       <packing>
         <property name="x">230</property>
         <property name="y">18</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkFixed" id="hrv1_fixed">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImage" id="poincare">
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="pixbuf">poincare.jpg</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkButton" id="hrv1_execute">
+        <property name="label" translatable="yes">Wykonaj</property>
+        <property name="name">hrv1_execute</property>
+        <property name="width_request">179</property>
+        <property name="height_request">40</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="margin_left">30</property>
+        <property name="margin_right">30</property>
+        <property name="margin_top">30</property>
+        <property name="margin_bottom">30</property>
+      </object>
+      <packing>
+        <property name="x">329</property>
+        <property name="y">253</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkImage" id="dft">
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="pixbuf">dft.jpg</property>
+      </object>
+      <packing>
+        <property name="x">540</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label8">
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_right">6</property>
+        <property name="label" translatable="yes">TUTAJ POWINNY
+SIĘ ZNALEŹĆ WSZYSTKIE
+WSPÓŁCZYNNIKI Z ANALIZY
+PO JEJ WYKONANIU</property>
+      </object>
+      <packing>
+        <property name="x">350</property>
+        <property name="y">117</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkFixed" id="hrv_dfa_fixed">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkButton" id="hrvdfa_execute">
+        <property name="label" translatable="yes">Wyznacz</property>
+        <property name="width_request">200</property>
+        <property name="height_request">35</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="resize_mode">queue</property>
+      </object>
+      <packing>
+        <property name="x">20</property>
+        <property name="y">15</property>
       </packing>
     </child>
   </object>
@@ -233,7 +314,6 @@
           <object class="GtkImage" id="wykres">
             <property name="width_request">800</property>
             <property name="height_request">300</property>
-            <property name="visible">False</property>
             <property name="can_focus">False</property>
             <property name="opacity">0.98999999999999999</property>
             <property name="pixbuf">wykres.jpg</property>
@@ -248,7 +328,6 @@
             <property name="label" translatable="yes">&lt;</property>
             <property name="width_request">30</property>
             <property name="height_request">100</property>
-            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="xalign">0.56000000238418579</property>
@@ -264,7 +343,6 @@
             <property name="label" translatable="yes">&gt;</property>
             <property name="width_request">30</property>
             <property name="height_request">100</property>
-            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="xalign">0.43999999761581421</property>
@@ -374,7 +452,42 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkButton" id="button100">
+      <object class="GtkButton" id="rpeaks_execute">
+        <property name="label" translatable="yes">Wyznacz</property>
+        <property name="width_request">200</property>
+        <property name="height_request">35</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="resize_mode">queue</property>
+      </object>
+      <packing>
+        <property name="x">20</property>
+        <property name="y">15</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="load_r">
+        <property name="label" translatable="yes">Pobierz</property>
+        <property name="width_request">200</property>
+        <property name="height_request">35</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="margin_top">1</property>
+        <property name="resize_mode">queue</property>
+      </object>
+      <packing>
+        <property name="x">274</property>
+        <property name="y">15</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkFixed" id="waves_fixed">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkButton" id="waves_execute">
         <property name="label" translatable="yes">Wyznacz</property>
         <property name="width_request">200</property>
         <property name="height_request">35</property>
@@ -469,7 +582,7 @@
             <property name="height_request">25</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="text" translatable="yes">aami-ec13/aami3a</property>
+            <property name="text" translatable="yes">mitdb/100</property>
           </object>
           <packing>
             <property name="x">360</property>
@@ -494,7 +607,7 @@
             <property name="height_request">25</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="text" translatable="yes">e</property>
+            <property name="text" translatable="yes">5</property>
           </object>
           <packing>
             <property name="x">360</property>
