@@ -521,15 +521,15 @@ PO JEJ WYKONANIU</property>
     </child>
     <child>
       <object class="GtkLabel" id="label10">
-        <property name="width_request">95</property>
+        <property name="width_request">127</property>
         <property name="height_request">23</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">dstep: </property>
+        <property name="label" translatable="yes">Krok w pochodnej: </property>
       </object>
       <packing>
-        <property name="x">7</property>
-        <property name="y">72</property>
+        <property name="x">28</property>
+        <property name="y">73</property>
       </packing>
     </child>
     <child>
@@ -545,15 +545,15 @@ PO JEJ WYKONANIU</property>
       </packing>
     </child>
     <child>
-      <object class="GtkEntry" id="b_dstep">
+      <object class="GtkEntry" id="b_krok_w_pochodnej">
         <property name="width_request">166</property>
         <property name="height_request">29</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
       </object>
       <packing>
-        <property name="x">90</property>
-        <property name="y">71</property>
+        <property name="x">266</property>
+        <property name="y">72</property>
       </packing>
     </child>
   </object>
