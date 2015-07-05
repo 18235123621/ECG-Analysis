@@ -81,7 +81,7 @@ getTend(signal) = #=[420 730 1350]=#
 sort(collect(keys(filter((key, val) -> val == "Tend", signal.anno))))
 
 function getRRIntervals(signal) 
-    intervals = Float32[]
+    intervals = Float64[]
     lastRtime = 0
     freq = getfreq(signal)
     for r = getR(signal)
