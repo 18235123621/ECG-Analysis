@@ -4,7 +4,8 @@ module ECGInput
 #Loads a signal record of given name and optionally given signal number and duration
 #More info: http://www.physionet.org/physiotools/wag/intro.htm
 
-export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR , getRRIntervals , getTend
+
+export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR, getRRIntervals, setPonset, setPend, setQRSonset, setQRSend, setR , getTend
 
 type Signal
     record::String
@@ -14,29 +15,29 @@ type Signal
     time::Any
 end
 
-Signal() = Signal("",[], Dict(), Dict(),"e")
+Signal() = Signal("", [], Dict(), Dict(), "e")
 
 function loadsignal(record::String, signal::Int=0, time::Any="e")
     data = readcsv(IOBuffer(readall(`wfdb/usr/bin/rdsamp -r $record -c -s $signal -t $time`)), Float32)[:,2]
     meta = readdlm(IOBuffer(readall(`wfdb/usr/bin/wfdbdesc $record`)), ':', String)
     startingTimeIndex = 8
-    for i=1:length(meta)
-       if isdefined(meta,i)
-          if meta[i,1]=="Starting time"
-             startingTimeIndex=i
+    for i = 1:length(meta)
+       if isdefined(meta, i)
+          if meta[i,1] == "Starting time"
+             startingTimeIndex = i
              break
           end
        end
     end
     metadict = Dict(map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,1]), map(lstrip, meta[startingTimeIndex:startingTimeIndex+14,2]))
-    Signal(record,data, metadict, Dict([(0, "START")]),time)
+    Signal(record, data, metadict, Dict([(0, "START")]), time)
 end
 
-function loadRpeaksFromAnnotations(signal)
+function loadRpeaks(signal)
     record = signal.record
     time  = signal.time
     downloadedAnnoLines = readlines(IOBuffer(readall(`wfdb/usr/bin/rdann -r $record -a atr -t $time -p N`)))
-    for i=downloadedAnnoLines
+    for i = downloadedAnnoLines
         signal.anno[int(split(i)[2])] = "R"
     end
 end
@@ -56,15 +57,11 @@ function savesignal(filename::String, signal::Signal)
     writecsv("$(filename)_anno.csv", signal.anno)
 end
 
-function getGain(signal) 
-    return int(split(signal.meta["Gain"])[1])
-end
+getgain(signal) = int(split(signal.meta["Gain"])[1])
 
 getres(signal) = int(split(signal.meta["ADC resolution"])[1])
 
 getfreq(signal) = int(split(signal.meta["Sampling frequency"])[1])
-
-#getbaseline(signal::Signal) = int(split(signal.meta["Baseline"])[1])
 
 getPonset(signal) = #= [300 600 1250  2640] DANE TESTOWE NIE KASOWAĆ!=#
  sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno))))
@@ -83,15 +80,27 @@ getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno)))
 getTend(signal) = #=[420 730 1350]=#
 sort(collect(keys(filter((key, val) -> val == "Tend", signal.anno))))
 
+
 function getRRIntervals(signal) 
-    intervals = [0]
+    intervals = Float32[]
     lastRtime = 0
+    freq = getfreq(signal)
     for r = getR(signal)
-        thisRtime = r*(1/getfreq(signal))
-        intervals=[intervals thisRtime-lastRtime ]
-        lastRtime=thisRtime
+        thisRtime = r * (1.0/freq)
+        push!(intervals, thisRtime - lastRtime)
+        lastRtime = thisRtime
     end
-    return intervals[2:end]
+    return intervals
 end
 
-end
+setR(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
+
+setPonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
+
+setPend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
+
+setQRSonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
+
+setQRSend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
+
+end #module

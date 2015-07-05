@@ -3,9 +3,9 @@ module HRV
 # A few simple examples; if you want to learn more about Gadfly, check out
 # http://www.gadflyjl.org/
 
-using DSP,Dierckx
+using DSP, Dierckx
 
-export TimeDomainType,FrequencyType,Poincare,TimeDomainAnalysis,FrequencyAnalysis
+export TimeDomainType, FrequencyType, Poincare, TimeDomainAnalysis, FrequencyAnalysis
 
 immutable FrequencyType
   TP::Float64
