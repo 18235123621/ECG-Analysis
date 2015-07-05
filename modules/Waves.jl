@@ -2,18 +2,18 @@ module Waves
 
 export ecgPeaks
 
-function ecgPeaks(fceg, R)
+function ecgPeaks(fceg, R, s = 20, dstep = 3)
 
     # Parametry
 
     # Krok w pochodnej
-    dstep = 3
+    #dstep = 3
 
     #Limit wyszukiwania
     limit = 30
 
     #Wielosc elementu strukturalnego
-    s = 20
+    #s = 20
 
     #Ilosc elementow ktore sa brane pod uwage
     N = 2000
