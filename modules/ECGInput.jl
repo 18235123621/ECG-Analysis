@@ -70,10 +70,10 @@ getPonset(signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", sign
 
 getPend(signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno))))
 
-getQRSonset(signal) = #=[340 640 1250] DANE TESTOWE NIE KASOWAĆ!=#
+getQRSonset(signal) = #=[340 640 1250 1900 2680] DANE TESTOWE NIE KASOWAĆ!=#
 sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno))))
 
-getQRSend(signal) = #=[390 690 1300] =#
+getQRSend(signal) = #=[390 690 1300 2080 2730] =#
 sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
 getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))

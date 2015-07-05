@@ -92,7 +92,7 @@ function reload_plot()
     if handle_R(freq,x[1],x[length(x)])
        legendData = [legendData , "R peak"]
     end
-    if handle_Waves(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
+    if handle_QRS(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
         legendData = [legendData , "QRS"]
     end
     println("$legendData")
@@ -123,17 +123,53 @@ function handle_R(freq,xstart,xend)
     end
 end
 
-function handle_Waves(freq,xstart,xend,y)
+function handle_QRS(freq,xstart,xend,y)
     if length(ECGInput.getQRSonset(signal))>0 && length(ECGInput.getQRSend(signal))==length(ECGInput.getQRSonset(signal)) && length(signal.data)>1
+
         qrsOn= filter(val-> (val>xstart && val<xend),ECGInput.getQRSonset(signal).*(1/freq));
         qrsEnd= filter(val-> (val>xstart && val<xend),ECGInput.getQRSend(signal).*(1/freq));
-    
-        for i=1:min(length(qrsOn),length(qrsEnd))
-            xQRS = (collect( [ECGInput.getQRSonset(signal)[i] ECGInput.getQRSend(signal)[i]] )).*(1/freq)
+        onLen=length(qrsOn)
+        endLen=length(qrsEnd)
+
+        iModif= onLen < endLen ? 1:0
+
+        iEnd = onLen < endLen ? endLen-1 : onLen
+        if onLen==endLen
+            iEnd = onLen
+        elseif onLen>endLen
+            iEnd = endLen
+        elseif onLen<endLen
+            iEnd = onLen
+        end
+        println("xstart= $xstart xend=$xend  iend= $iEnd onLen=$onLen endLen=$endLen")
+        for i= 1 : iEnd
+            println("i= $i")
+            xQRS = (collect( [qrsOn[i] qrsEnd[i+iModif] ] ))
+            println("after QRS init")
             yV=zeros(xQRS)
             fill!(yV,y)
             plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
         end
+       
+        #brzegi wykresu
+        if length(qrsOn) > length(qrsEnd) && length(qrsOn)>0
+            println("xEND 1 = $xend")
+            xQRS = collect([qrsOn[length(qrsOn)] xend])
+            println("xQRS 1 = $xQRS")
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+        end
+
+        if length(qrsOn) < length(qrsEnd) && length(qrsEnd)>0
+            println("xstart 2 = $xstart")
+            xQRS = collect([ xstart qrsEnd[1] ])
+            println("xQRS 2 = $xQRS")
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
+        end
+        #brzegi wykresu
        
         #println("xQRS=$xQRS , y=$y")
     
