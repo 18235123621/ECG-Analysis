@@ -92,14 +92,14 @@ function reload_plot()
     if handle_R(freq,x[1],x[length(x)])
        legendData = [legendData , "R peak"]
     end
-    if handle_Waves(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.05*minimum(data[xstart:xend]))
+    if handle_Waves(freq,x[1],x[length(x)],minimum(data[xstart:xend]) - 0.08*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend]))))
         legendData = [legendData , "QRS"]
     end
     println("$legendData")
     #WAŻNE - OBSŁUGA MODUŁÓW
 
-    yMaxAxis=maximum(data[xstart:xend]) + 0.03*maximum(data[xstart:xend])
-    yMinAxis=minimum(data[xstart:xend]) - 0.1*minimum(data[xstart:xend])
+    yMaxAxis=maximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
+    yMinAxis=minimum(data[xstart:xend]) - 0.1*max(maximum(data[xstart:xend]),abs(minimum(data[xstart:xend])))
 
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
@@ -127,13 +127,16 @@ function handle_Waves(freq,xstart,xend,y)
     if length(ECGInput.getQRSonset(signal))>0 && length(ECGInput.getQRSend(signal))==length(ECGInput.getQRSonset(signal)) && length(signal.data)>1
         qrsOn= filter(val-> (val>xstart && val<xend),ECGInput.getQRSonset(signal).*(1/freq));
         qrsEnd= filter(val-> (val>xstart && val<xend),ECGInput.getQRSend(signal).*(1/freq));
-        xQRS=[0]
-        yQRS=[0]
+    
         for i=1:min(length(qrsOn),length(qrsEnd))
-           xQRS = [ECGInput.getQRSonset(signal)[i] ECGInput.getQRSend(signal)[i]].*(1/freq)
-           println("plot $xQRS vs $y")
-           plt.plot(xQRS,[y y],color="green",linestyle="--", linewidth=2.0,marker="o")
+            xQRS = (collect( [ECGInput.getQRSonset(signal)[i] ECGInput.getQRSend(signal)[i]] )).*(1/freq)
+            yV=zeros(xQRS)
+            fill!(yV,y)
+            plt.plot(xQRS, yV,color="green", linewidth=2.0,"b^-")
         end
+       
+        #println("xQRS=$xQRS , y=$y")
+    
         return true;
     else
         println("ERROR: handle_Waves");

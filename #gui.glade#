@@ -141,6 +141,15 @@
         <property name="y">225</property>
       </packing>
     </child>
+    <child>
+      <object class="GtkImage" id="dft">
+        <property name="width_request">100</property>
+        <property name="height_request">80</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="pixbuf">poincare.jpg</property>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
@@ -173,7 +182,7 @@
     <property name="title" translatable="yes">Przetwarzanie sygnałów EKG</property>
     <child>
       <object class="GtkFixed" id="window_fixed">
-        <property name="height_request">697</property>
+        <property name="height_request">700</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
