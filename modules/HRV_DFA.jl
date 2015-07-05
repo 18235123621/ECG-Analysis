@@ -27,7 +27,7 @@ export dfa
 		while n > 2
 			for i=1:length(y)-n
 				p = polyfit(i:i+n-1, y[i:i+n-1], 1)
-				tmpTrendlines = p[1]+p[2]*(i)
+				tmpTrendlines = p[2]+p[1]*(i)
 				trendlines[i] = tmpTrendlines
 			end
 			lt = length(trendlines)
@@ -55,7 +55,7 @@ export dfa
 		
 		a = zeros(length(logF))
 		for i=1:length(logF)
-			a[i] = logF[i]/logN[i]
+			a[i] = logF[i]/-logN[i]
 		end
         
 		return a
