@@ -32,7 +32,7 @@ function loadsignal(record::String, signal::Int=0, time::Any="e")
     Signal(record, data, metadict, Dict([(0, "START")]), time)
 end
 
-function loadRpeaks(signal::Signal)
+function loadRpeaks(signal)
     record = signal.record
     time  = signal.time
     downloadedAnnoLines = readlines(IOBuffer(readall(`wfdb/usr/bin/rdann -r $record -a atr -t $time -p N`)))
@@ -50,30 +50,30 @@ function opensignal(filename::String)
     Signal(data, metadict, annodict)
 end
 
-function savesignal(filename::String, signal::Signal)
+function savesignal(filename::String, signal)
     writecsv("$(filename)_data.csv", signal.data)
     writecsv("$(filename)_meta.csv", signal.meta)
     writecsv("$(filename)_anno.csv", signal.anno)
 end
 
-getgain(signal::Signal) = int(split(signal.meta["Gain"])[1])
+getgain(signal) = int(split(signal.meta["Gain"])[1])
 
-getres(signal::Signal) = int(split(signal.meta["ADC resolution"])[1])
+getres(signal) = int(split(signal.meta["ADC resolution"])[1])
 
-getfreq(signal::Signal) = int(split(signal.meta["Sampling frequency"])[1])
+getfreq(signal) = int(split(signal.meta["Sampling frequency"])[1])
 
-getPonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno)))) #=[300 600 1250 1900 2640] DANE TESTOWE NIE KASOWAĆ!=#
+getPonset(signal) = sort(collect(keys(filter((key, val) -> val == "Ponset", signal.anno)))) #=[300 600 1250 1900 2640] DANE TESTOWE NIE KASOWAĆ!=#
 
-getPend(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno)))) #=[320 620 1300 2080 2660] =#
+getPend(signal) = sort(collect(keys(filter((key, val) -> val == "Pend", signal.anno)))) #=[320 620 1300 2080 2660] =#
 
-getQRSonset(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno)))) #= [340 640 1250 1900 2680] DANE TESTOWE NIE KASOWAĆ!=#
+getQRSonset(signal) = sort(collect(keys(filter((key, val) -> val == "QRSonset", signal.anno)))) #= [340 640 1250 1900 2680] DANE TESTOWE NIE KASOWAĆ!=#
 
-getQRSend(signal::Signal) = #= [390 690 1300 2180 2730]=#
+getQRSend(signal) = #= [390 690 1300 2180 2730]=#
 sort(collect(keys(filter((key, val) -> val == "QRSend", signal.anno))))
 
-getR(signal::Signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
+getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno))))
 
-function getRRIntervals(signal::Signal) 
+function getRRIntervals(signal) 
     intervals = Float32[]
     lastRtime = 0
     freq = getfreq(signal)
@@ -85,14 +85,14 @@ function getRRIntervals(signal::Signal)
     return intervals
 end
 
-setR(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
+setR(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
 
-setPonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
+setPonset(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
 
-setPend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
+setPend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
 
-setQRSonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
+setQRSonset(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
 
-setQRSend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
+setQRSend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
 
 end #module
