@@ -365,6 +365,7 @@ window_load_params = GAccessor.object(builder_main,"window_load_params");
 wykres = GAccessor.object(builder_main,"wykres")
 poincareView = GAccessor.object(builder_main,"poincare")
 dftView = GAccessor.object(builder_main,"dft")
+dfaView = GAccessor.object(builder_main,"dfa")
 
 # Okna modułów
 baseline_fixed = GAccessor.object(builder_main,"baseline_fixed")
