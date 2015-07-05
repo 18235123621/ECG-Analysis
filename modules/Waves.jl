@@ -1,5 +1,7 @@
 module Waves
 
+export ecgPeaks
+
 function ecgPeaks(fceg, R)
 
     # Parametry
