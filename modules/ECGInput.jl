@@ -51,7 +51,7 @@ function opensignal(filename::String)
     Signal(data, metadict, annodict)
 end
 
-function savesignal(filename::String, signal::Signal)
+function savesignal(filename::String, signal)
     writecsv("$(filename)_data.csv", signal.data)
     writecsv("$(filename)_meta.csv", signal.meta)
     writecsv("$(filename)_anno.csv", signal.anno)
@@ -80,7 +80,6 @@ getR(signal) = sort(collect(keys(filter((key, val) -> val == "R", signal.anno)))
 getTend(signal) = #=[420 730 1350]=#
 sort(collect(keys(filter((key, val) -> val == "Tend", signal.anno))))
 
-
 function getRRIntervals(signal) 
     intervals = Float32[]
     lastRtime = 0
@@ -93,14 +92,16 @@ function getRRIntervals(signal)
     return intervals
 end
 
-setR(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
+setR(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
 
-setPonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
+setPonset(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
 
-setPend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
+setPend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
 
-setQRSonset(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
+setQRSonset(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
 
-setQRSend(signal::Signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
+setQRSend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
+
+setTend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Tend", w)
 
 end #module
