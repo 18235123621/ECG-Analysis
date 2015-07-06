@@ -11,13 +11,13 @@ type Signal
     record::String
     data::Array{Float32, 1}
     meta::Dict{String, String}
-    anno::Dict{Int, String}
+    anno::Dict{Int64, String}
     time::Any
 end
 
 Signal() = Signal("", [], Dict(), Dict(), "e")
 
-function loadsignal(record::String, signal::Int=0, time::Any="e")
+function loadsignal(record::String, signal::Int64=0, time::Any="e")
     data = readcsv(IOBuffer(readall(`wfdb/usr/bin/rdsamp -r $record -c -s $signal -t $time`)), Float32)[:,2]
     meta = readdlm(IOBuffer(readall(`wfdb/usr/bin/wfdbdesc $record`)), ':', String)
     startingTimeIndex = 8
@@ -48,7 +48,7 @@ function opensignal(filename::String)
     anno = readcsv("$(filename)_anno.csv", String)
     metadict = Dict(meta[:,1], meta[:,2])
     annodict = Dict(map(parseint, anno[:,1]), anno[:,2])
-    Signal(data, metadict, annodict)
+    Signal(filename, data, metadict, annodict, length(data))
 end
 
 function savesignal(filename::String, signal)
