@@ -2,18 +2,18 @@ module Waves
 
 export ecgPeaks
 
-function ecgPeaks(fceg, R)
+function ecgPeaks(fceg, R, s = 20, dstep = 3)
 
     # Parametry
-    
+
     # Krok w pochodnej
-    dstep = 3
+    #dstep = 3
 
     #Limit wyszukiwania
     limit = 50
 
     #Wielosc elementu strukturalnego
-    s = 15
+    #s = 20
 
     #Ilosc elementow ktore sa brane pod uwage
     N = length(fecg)
@@ -38,7 +38,7 @@ function ecgPeaks(fceg, R)
     M = copy(fecg)
 
     ROnSet = Int64[]
-    ROffSet = Int64[]   
+    ROffSet = Int64[]
     Q = Int64[]
     S = Int64[]
     POnSet = Int64[]
@@ -83,9 +83,8 @@ function ecgPeaks(fceg, R)
         end
         dt = copy(dtn)
       end
-      
     end
-    
+
     # Szukanie Q
     ROnSetN = length(ROnSet)
     #println(ROnSetN)
@@ -124,8 +123,8 @@ function ecgPeaks(fceg, R)
           end
       end
     end
-  
-   # Szukanie P
+
+    # Szukanie P
     PN = length(Q)
 
     for n = 1:PN
