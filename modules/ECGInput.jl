@@ -87,16 +87,16 @@ function getRRIntervals(signal)
     return intervals
 end
 
-setR(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "R", w)
+setR(signal, w::Array{Int64, 1}) = map(i -> signal.anno[i] = "R", w)
 
-setPonset(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Ponset", w)
+setPonset(signal, w::Array{Int64, 1}) = map(i -> signal.anno[i] = "Ponset", w)
 
-setPend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Pend", w)
+setPend(signal, w::Array{Int64, 1}) = map(i -> signal.anno[i] = "Pend", w)
 
-setQRSonset(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
+setQRSonset(signal, w::Array{Int64, 1}) = map(i -> signal.anno[i] = "QRSonset", w)
 
-setQRSend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "QRSend", w)
+setQRSend(signal, w::Array{Int64, 1}) = map(i -> signal.anno[i] = "QRSend", w)
 
-setTend(signal, w::Array{Int, 1}) = map(i -> signal.anno[i] = "Tend", w)
+setTend(signal, w::Array{Int64, 1}) = map(i -> signal.anno[i] = "Tend", w)
 
 end #module
