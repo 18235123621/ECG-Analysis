@@ -39,6 +39,9 @@ using HRV_DFA
 current_page = 0
 items_per_page = 2000
 signal = Signal()
+hrvDone=false
+dfaDone=false
+
 
 # PODSTAWOWE FUNKCJE - CORE
 
@@ -106,7 +109,7 @@ function reload_plot()
     axis([xstart/freq , xend/freq , yMinAxis,yMaxAxis ])
     xlabel("time [s]")
     ylabel("voltage [mV]")
-    legend(ncol=3,loc=9,bbox_to_anchor=[0.5,1.3]) # 9 = legend is upper center
+    legend(ncol=4,loc=9,bbox_to_anchor=[0.5,1.3]) # 9 = legend is upper center
     savefig("wykres.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.hold(false)
     plt.close()
@@ -291,6 +294,17 @@ function handle_P(freq,xstart,xend,y,simple)
         return false;
     end
 end
+function reset_poincare_plot()
+    figure(2, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
+    plot([0], [0],color="blue",linewidth=0)
+    title("Poincare plot")
+    xlabel("RR [ms]")
+    ylabel("RR j+1 [ms]")
+    grid()
+    savefig("poincare.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),poincareView,bytestring ("poincare.jpg"))
+end
 
 function reload_poincare_plot(poincare)
     figure(2, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
@@ -305,6 +319,39 @@ function reload_poincare_plot(poincare)
 end
 
 function reload_dfa_plot(data)
+    figure(6, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
+    plot(collect([1:length(data)]), data,color="red",linewidth=1)
+    title("DFA plot")
+    xlabel("N")
+    ylabel("DFA")
+    grid()
+    savefig("dfa.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dfaView,bytestring ("dfa.jpg"))
+end
+
+function reset_dfa_plot()
+    figure(6, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
+    plot([0],[0],color="red",linewidth=1)
+    title("DFA plot")
+    xlabel("N")
+    ylabel("DFA")
+    grid()
+    savefig("dfa.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dfaView,bytestring ("dfa.jpg"))
+end
+
+function reset_dft_plot()
+    figure(3, figsize=[6, 3], dpi=60, facecolor="#f2f1f0")
+    plot([0], [0])
+    title("DFT")
+    xlabel("Częstotliwość")
+    ylabel("|Y(f)|")
+    grid()
+    savefig("dft.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
+    plt.close()
+    ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dftView,bytestring ("dft.jpg"))
 end
 
 function reload_dft_plot(oX,oY)
@@ -317,7 +364,6 @@ function reload_dft_plot(oX,oY)
     savefig("dft.jpg", format="jpg", bbox_inches="tight", pad_inches=0, facecolor="#f2f1f0")
     plt.close()
     ccall((:gtk_image_set_from_file,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{Uint8}),dftView,bytestring ("dft.jpg"))
-
 end
 
 function refresh_fs()
@@ -426,8 +472,10 @@ end
 # Suwak w prawo
 sig_move_right = signal_connect(GAccessor.object(builder_main,"move_right"), :clicked) do widget
     global current_page
-    current_page = current_page + 1
-    reload_plot()
+    if length(signal.data) > current_page * (items_per_page ) + (items_per_page ) 
+        current_page = current_page + 1
+        reload_plot()
+    end
 end
 
 # Otwarcie okna zmiany rozdzielczosci wykresu
@@ -486,12 +534,19 @@ end
 sig_menu_hrv1 = signal_connect(GAccessor.object(builder_main,"menu_hrv1"), :clicked) do widget
     clear_workspace()
     push!(modules, hrv1_fixed)
+    if hrvDone==false
+        reset_poincare_plot()
+        reset_dft_plot()
+    end
 end
 
 # Ładowanie modułu HRV_DFA
 sig_menu_r_peaks = signal_connect(GAccessor.object(builder_main,"menu_hrv_dfa"), :clicked) do widget
     clear_workspace()
     push!(modules, hrv_dfa_fixed)
+    if dfaDone==false
+       reset_dfa_plot()
+    end
 end
 
 # PRZEKAZANIE SYGNAŁU DO MODUŁÓW

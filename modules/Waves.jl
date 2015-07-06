@@ -4,61 +4,67 @@ export ecgPeaks
 
 function ecgPeaks(fceg, R)
 
-    # Parametry
+     # Parametry
 
+    
     # Krok w pochodnej
     dstep = 3
 
     #Limit wyszukiwania
-    limit = 30
+    limit = 50
 
     #Wielosc elementu strukturalnego
-    s = 20
+    s = 15
 
     #Ilosc elementow ktore sa brane pod uwage
-    N = 2000
-
-    # Wybranie potrzebnej ilosci R
+    N = length(fecg)
+    
+   
     i = 1
     while i <= length(R)-1 && R[i+1] < N
         i = i + 1
     end
     R = R[1:i]
     NR = i
+    
+    
+    # Przesuniecie po filtracji
+    move =15;
+    
+    responsetype = Lowpass(11; fs=360)
+    designmethod = Butterworth(4)
+    fecg = filt(digitalfilter(responsetype, designmethod), fecg)
+    fecg[1:(N-move)+1] = fecg[move:N];
+    fecg = denoise(fecg);
+    
+    
 
-    #Sprawdzanie czy N nie jest wieksze niz dlugosc sygnalu
-    if length(fecg) < N
-        N = length(fecg)
-    end
-
-    fecg = fecg[1:N]
-
+    
+    
     # Operacje morfologiczne na sygnale
     M = copy(fecg)
 
-    for n = 1:N
-        if n <= s + 1
-            M[n] = (maximum(fecg[1:n+s]) + minimum(fecg[1:n+s]) - 2 * fecg[n])/s
-        elseif n >= s-1
-            M[n] = (maximum(fecg[n-s:N]) + minimum(fecg[n-s:N]) - 2 *  fecg[n])/s
-        else
-            M[n] = (maximum(fecg[n-s:n+s]) + minimum(fecg[n-s:n+s]) - 2 * fecg[n])/s
-        end
-    end
-
-    println(R)
-
-    RN = length(R)
     ROnSet = Int64[]
-    ROffSet = Int64[]
+    ROffSet = Int64[]   
     Q = Int64[]
     S = Int64[]
     POnSet = Int64[]
     POffSet = Int64[]
     TOnSet = Int64[]
     TOffSet = Int64[]
-
-    for n = 1:RN
+    
+    for n = 1:N
+        if n <= s + 1
+            M[n] = (maximum(fecg[1:n+s]) + minimum(fecg[1:n+s]) - 2 * fecg[n])/s
+        elseif n >= N-s-1
+            M[n] = (maximum(fecg[n-s:N]) + minimum(fecg[n-s:N]) - 2 *  fecg[n])/s
+        else
+            M[n] = (maximum(fecg[n-s:n+s]) + minimum(fecg[n-s:n+s]) - 2 * fecg[n])/s
+        end
+    end
+    
+  
+   for n = 1:NR
       dt = (M[R[n]+dstep] - M[R[n]]) / dstep
 
       # Szukanie ROffSet
@@ -78,25 +84,27 @@ function ecgPeaks(fceg, R)
       # Szukanie ROnSet
       for i = 2:1:limit
         dtn = (M[R[n]-i] - M[R[n]-i-dstep]) / dstep
-        if (dtn * dt) < 0 && dtn < 0
+        if (dtn * dt) < 0 && dtn > 0
             ROnSet = push!(ROnSet, R[n]-i)
             break
         end
         dt = copy(dtn)
       end
+      
     end
-
+    
     # Szukanie Q
     ROnSetN = length(ROnSet)
-
+    #println(ROnSetN)
     for n = 1:ROnSetN
       dt = (M[ROnSet[n]] - M[ROnSet[n]-dstep]) / dstep
 
       for i = 2:1:limit
           if ROnSet[n] + dstep + i < N
             dtn = (M[ROnSet[n]-i] - M[ROnSet[n]-i-dstep]) / dstep
-            if (dtn * dt) < 0 && dtn > 0
-              Q = push!(Q, ROnSet[n]-i)
+            if (dtn * dt) < 0 && dtn < 0
+	     # println(Q)
+              push!(Q, ROnSet[n]-i)
               break
             end
             dt = copy(dtn)
@@ -106,7 +114,8 @@ function ecgPeaks(fceg, R)
 
     # Szukanie S
     ROffSetN = length(ROffSet)
-
+    #println(ROffSetN)
+    
     for n = 1:ROffSetN
       dt = (M[ROffSet[n]+dstep] - M[ROffSet[n]]) / dstep
 
@@ -114,15 +123,16 @@ function ecgPeaks(fceg, R)
           if ROffSet[n] + dstep + i < N
             dtn = (M[ROffSet[n]+dstep+i] - M[ROffSet[n]+i]) / dstep
             if (dtn * dt) < 0 && dtn > 0
-              S = push!(S, ROffSet[n]+i)
+	      #println(S)
+              push!(S, (ROffSet[n]+i))
               break
             end
             dt = copy(dtn)
           end
       end
     end
-
-    # Szukanie P
+  
+   # Szukanie P
     PN = length(Q)
 
     for n = 1:PN
@@ -132,7 +142,7 @@ function ecgPeaks(fceg, R)
       for i = 2:1:limit
           if Q[n] - dstep - i < N
             dtn = (M[Q[n]-i] - M[Q[n]-i-dstep]) / dstep
-            if (dtn * dt) < 0 && dtn < 0
+            if (dtn * dt) < 0 && dtn > 0
               POffSet = push!(POffSet, Q[n]-i)
               break
             end
@@ -147,7 +157,7 @@ function ecgPeaks(fceg, R)
       for i = 2:1:limit
       #if Q[n] + dstep + i < N
         dtn = (M[Q[n]-i] - M[Q[n]-i-dstep]) / dstep
-        if (dtn * dt) < 0 && dtn < 0
+        if (dtn * dt) < 0 && dtn > 0
           POnSet = push!(POnSet, Q[n]-i-shift)
           break
         end
@@ -187,7 +197,11 @@ function ecgPeaks(fceg, R)
       end
     end
 
-    return POnSet, POffSet, Q, ROnSet, ROffSet, S, TOnSet, TOffSet
+    QRSOnSet = Q
+    QRSOffSet = S
+    
+    
+    return POnSet, POffSet, QRSOnSet, QRSOffSet, TOffSet
 
 end #function
 

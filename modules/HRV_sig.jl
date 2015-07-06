@@ -1,5 +1,5 @@
 sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"hrv1_execute"), :clicked) do widget
-    global signal
+    global signal,hrvDone
     if length(signal.data) > 1
 	RRint = ECGInput.getRRIntervals(signal)
         if length(RRint) > 1
@@ -7,6 +7,7 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"hrv1_execute"),
             frequency = HRV.FrequencyAnalysis(RRint)
             reload_poincare_plot(poincare)
             reload_dft_plot(frequency.WidmoX, frequency.WidmoY)
+            hrvDone=true;
         else
             println("ERROR: RR intervals are empty!")
         end
