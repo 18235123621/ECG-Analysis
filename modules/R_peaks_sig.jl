@@ -6,7 +6,7 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"load_r"), :clic
         println(getR(signal))
         reload_plot()
     else
-        println("ERROR: signal record is empty!")
+        error_dialog("ERROR: signal record is empty!")
     end
 end
 
@@ -18,7 +18,7 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"rpeaks_execute"
 	ECGInput.setR(signal, R)
         reload_plot()
     else
-        println("ERROR: signal record is empty!")
+        error_dialog("ERROR: signal record is empty!")
     end
 end
 

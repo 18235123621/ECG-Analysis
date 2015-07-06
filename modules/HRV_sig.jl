@@ -7,11 +7,11 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"hrv1_execute"),
             frequency = HRV.FrequencyAnalysis(RRint)
             reload_poincare_plot(poincare)
             reload_dft_plot(frequency.WidmoX, frequency.WidmoY)
-            hrvDone=true;
+            hrvDone = true
         else
-            println("ERROR: RR intervals are empty!")
+            error_dialog("ERROR: RR intervals are empty!")
         end
     else
-        println("ERROR: signal data is empty!")
+        error_dialog("ERROR: signal data is empty!")
     end
 end

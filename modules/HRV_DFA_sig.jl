@@ -3,9 +3,9 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"hrvdfa_execute"
     if length(signal.data) > 1
         dfa_result = HRV_DFA.dfa(ECGInput.getRRIntervals(signal))
         reload_dfa_plot(dfa_result)
-        dfaDone=true
+        dfaDone = true
         println(dfa_result)
     else
-        println("ERROR: signal data is empty!")
+        error_dialog("ERROR: signal data is empty!")
     end
 end

@@ -6,6 +6,6 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"waves_execute")
         println("Wynik Waves:")
         println(waves_result)
     else
-        println("ERROR: signal data is empty!")
+        error_dialog("ERROR: signal data is empty!")
     end
 end

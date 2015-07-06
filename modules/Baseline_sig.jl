@@ -19,6 +19,6 @@ sig_baseline_execute = signal_connect(GAccessor.object(builder_main,"baseline_ex
         end
         reload_plot()
     else
-        println("ERROR: signal data is empty!")
+        error_dialog("ERROR: signal data is empty!")
     end
 end
