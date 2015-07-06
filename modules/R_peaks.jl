@@ -54,8 +54,14 @@ function panTompkins(signal, fs)
 	end
      end
 
+    Rs = 0;
 
-    return m[2:length(m)]-43;
+    for i = 2:length(m)
+       rTmp = m[i]-43;
+       newR = indmax(signal[rTmp-int(fs/10):rTmp+int(fs/10)]);
+       Rs = [Rs newR+rTmp-int(fs/10)];
+    end
+    return Rs[2:length(Rs)];
 end
 
 end

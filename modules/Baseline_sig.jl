@@ -15,6 +15,7 @@ sig_baseline_execute = signal_connect(GAccessor.object(builder_main,"baseline_ex
             signal.data = Baseline.butterworthFilter(signal.data, baseline_fs, baseline_fc)
             println("Wykonano modul Baseline (butterworth)")
         elseif baseline_type == 3
+            signal.data = Baseline.savitzkyGolay(signal.data, baseline_fs, baseline_fc)
             println("Wykonano modul Baseline (filtr savitzky-golay)")
         end
         reload_plot()
