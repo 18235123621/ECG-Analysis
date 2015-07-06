@@ -250,7 +250,7 @@ end
   
   end
 
-    QRSOnSet = R
+    QRSOnSet = Q
     QRSOffSet = S
     
     return POnSet, POffSet, QRSOnSet, QRSOffSet, TOffSet
