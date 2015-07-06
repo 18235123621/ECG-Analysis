@@ -4,8 +4,7 @@ export ecgPeaks
 
 function ecgPeaks(fceg, R)
 
-     # Parametry
-
+    # Parametry
     
     # Krok w pochodnej
     dstep = 3
@@ -18,8 +17,7 @@ function ecgPeaks(fceg, R)
 
     #Ilosc elementow ktore sa brane pod uwage
     N = length(fecg)
-    
-   
+
     i = 1
     while i <= length(R)-1 && R[i+1] < N
         i = i + 1
@@ -27,20 +25,15 @@ function ecgPeaks(fceg, R)
     R = R[1:i]
     NR = i
     
-    
     # Przesuniecie po filtracji
-    move =15;
+    move = 15
     
     responsetype = Lowpass(11; fs=360)
     designmethod = Butterworth(4)
     fecg = filt(digitalfilter(responsetype, designmethod), fecg)
-    fecg[1:(N-move)+1] = fecg[move:N];
-    fecg = denoise(fecg);
-    
-    
+    fecg[1:(N-move)+1] = fecg[move:N]
+    fecg = denoise(fecg)
 
-    
-    
     # Operacje morfologiczne na sygnale
     M = copy(fecg)
 
@@ -199,7 +192,6 @@ function ecgPeaks(fceg, R)
 
     QRSOnSet = Q
     QRSOffSet = S
-    
     
     return POnSet, POffSet, QRSOnSet, QRSOffSet, TOffSet
 

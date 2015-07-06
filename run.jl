@@ -103,7 +103,7 @@ function reload_plot()
 
     #WAŻNE - OBSŁUGA MODUŁÓW END
 
-    yMaxAxis =m aximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend])))
+    yMaxAxis = maximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend])))
     yMinAxis = minimum(data[xstart:xend]) - 0.1*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend])))
 
     axis([xstart/freq, xend/freq, yMinAxis, yMaxAxis])
@@ -123,7 +123,7 @@ function handle_R(freq, xstart, xend)
         plot(xR, yR, color="red", marker="o", linewidth=0, label="R")
         return true
     else
-        error_dialog("ERROR: handleR() R peaks array is empty")
+        println("ERROR: handleR() R peaks array is empty")
         return false
     end
 end
@@ -193,7 +193,7 @@ function handle_QRS(freq, xstart, xend, y, simple)
         plot(xOff, yOff, color="#44D6ED", marker="o", linewidth=0, label="QRS_end")
         return true
     else
-        error_dialog("ERROR: handle_Waves")
+        println("ERROR: handle_Waves")
         return false
     end
 end
@@ -215,7 +215,7 @@ function handle_T(freq, xstart, xend, y, simple)
         yOn = signal.data[filter(r -> (r>xstart*freq && r<xend*freq), ECGInput.getTend(signal))]
         plot(xOn, yOn, color="#ED44E7", marker="o", linewidth=0, label="T_end")
     else
-        error_dialog("ERROR: handle_T")
+        println("ERROR: handle_T")
         return false
     end
 end
@@ -284,7 +284,7 @@ function handle_P(freq, xstart, xend, y, simple)
         plot(xOff, yOff, color="yellow", marker="o", linewidth=0, label="P_end")
         return true
     else
-        error_dialog("ERROR: handle_P")
+        println("ERROR: handle_P")
         return false
     end
 end
