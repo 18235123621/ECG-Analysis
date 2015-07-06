@@ -12,7 +12,12 @@ function ecgPeaks(fecg, R, s=20, dstep=3)
     #dstep = 3
 
     #Limit wyszukiwania
-    limit = 50
+    #Limit wyszukiwania
+    fs =360
+    limit = 30
+    QRSlimit = convert(Int64, round(0.11 * fs))
+    Plimit = convert(Int64, round(0.11 * fs))
+    Tlimit = convert(Int64, round(0.16 * fs))
 
     #Wielosc elementu strukturalnego
     #s = 20
@@ -61,49 +66,64 @@ function ecgPeaks(fecg, R, s=20, dstep=3)
   
    for n = 1:NR
       dt = (M[R[n]+dstep] - M[R[n]]) / dstep
-
+      
+      
       # Szukanie ROffSet
+
+      localmax = R[n]+1
       for i = 2:1:limit
         if R[n] + dstep + i < N
             dtn = (M[R[n] + dstep + i] - M[R[n]+i]) / dstep
             if (dtn * dt) < 0 && dtn < 0
-                ROffSet = push!(ROffSet, R[n]+i)
-                break
+                if M[localmax] < M[R[n] + i]
+		  localmax = R[n]+i
+                end
             end
             dt = copy(dtn)
         end
-      end
-
+     
+     end   
+      push!(ROffSet, localmax)
+      
       dt = (M[R[n]] - M[R[n] - dstep]) / dstep
 
       # Szukanie ROnSet
+      
+      localmax = R[n]-1
       for i = 2:1:limit
         dtn = (M[R[n]-i] - M[R[n]-i-dstep]) / dstep
         if (dtn * dt) < 0 && dtn > 0
-            ROnSet = push!(ROnSet, R[n]-i)
-            break
+            
+            if M[localmax] < M[R[n]-i]
+		  localmax = R[n]-i
+                end
         end
         dt = copy(dtn)
       end
+      ROnSet = push!(ROnSet, localmax)
+    
     end
-
+    
     # Szukanie Q
+    
     ROnSetN = length(ROnSet)
     #println(ROnSetN)
     for n = 1:ROnSetN
+    
       dt = (M[ROnSet[n]] - M[ROnSet[n]-dstep]) / dstep
-
+      localmin = ROnSet[n]-1
       for i = 2:1:limit
           if ROnSet[n] + dstep + i < N
             dtn = (M[ROnSet[n]-i] - M[ROnSet[n]-i-dstep]) / dstep
             if (dtn * dt) < 0 && dtn < 0
-	     # println(Q)
-              push!(Q, ROnSet[n]-i)
-              break
+		if M[localmin] > M[ROnSet[n]-i]
+		  localmin = ROnSet[n]-i
+                end              
             end
             dt = copy(dtn)
           end
       end
+      push!(Q, localmin)
     end
 
     # Szukanie S
@@ -112,54 +132,72 @@ function ecgPeaks(fecg, R, s=20, dstep=3)
     
     for n = 1:ROffSetN
       dt = (M[ROffSet[n]+dstep] - M[ROffSet[n]]) / dstep
-
+      localmin = ROffSet[n]+1
       for i = 2:1:limit
+      if(ROffSet[n]+i+dstep)<N
           if ROffSet[n] + dstep + i < N
             dtn = (M[ROffSet[n]+dstep+i] - M[ROffSet[n]+i]) / dstep
             if (dtn * dt) < 0 && dtn > 0
-	      #println(S)
-              push!(S, (ROffSet[n]+i))
-              break
+	      if M[localmin] > M[ROffSet[n]+i]
+		  localmin = ROffSet[n]+i
+                end 
             end
             dt = copy(dtn)
           end
+          end
       end
+      push!(S, localmin)
     end
-
-    # Szukanie P
+  
+   # Szukanie P
     PN = length(Q)
 
+    
     for n = 1:PN
-      dt = (M[Q[n]+dstep] - M[Q[n]]) / dstep
+      
 
       # Szukanie POffSet
+      if Q[n] - dstep - limit > 0
+      dt = (M[Q[n]+dstep] - M[Q[n]]) / dstep
+      localmax = Q[n]-1
       for i = 2:1:limit
-          if Q[n] - dstep - i < N
+          
             dtn = (M[Q[n]-i] - M[Q[n]-i-dstep]) / dstep
             if (dtn * dt) < 0 && dtn > 0
-              POffSet = push!(POffSet, Q[n]-i)
-              break
+              
+              if M[localmax] < M[Q[n]-i]
+		  localmax = Q[n]-i
+	      end
             end
             dt = copy(dtn)
-          end
+         
       end
-
-	shift=i    
+      push!(POffSet, localmax)
+      end
+     
+      shift=i    
+       if Q[n] - dstep - limit - shift > 0
       dt = (M[Q[n]-shift] - M[Q[n]-dstep-shift]) / dstep
 
       # Szukanie POnSet
+      localmax = Q[n]-shift-1
+      
       for i = 2:1:limit
       #if Q[n] + dstep + i < N
-        dtn = (M[Q[n]-i] - M[Q[n]-i-dstep]) / dstep
+        dtn = (M[Q[n]-i-shift] - M[Q[n]-i-dstep-shift]) / dstep
         if (dtn * dt) < 0 && dtn > 0
-          POnSet = push!(POnSet, Q[n]-i-shift)
-          break
+	    if M[localmax] < M[Q[n]-i-shift]
+		  localmax = Q[n]-i-shift
+            end
+          
+          
         end
         dt = copy(dtn)
-       #end
+       
       end
+      push!(POnSet, localmax)
     end
-
+end
     # Szukanie T
     TN = length(S)
 
@@ -167,31 +205,53 @@ function ecgPeaks(fecg, R, s=20, dstep=3)
       dt = (M[S[n]+dstep] - M[S[n]]) / dstep
 
       # Szukanie TOnSet
-      for i = 2:1:limit
+      localmax = S[n]+1
+      for i = 2:1:(2*limit)
+      if(S[n]+i+dstep)<N
         dtn = (M[S[n]+i+dstep] - M[S[n]+i]) / dstep
         if (dtn * dt) < 0 && dtn < 0
          dtn = (M[S[n]+i+dstep] - M[S[n]+i]) / dstep
-          TOnSet = push!(TOnSet, S[n]+i)
-          break
+           if M[localmax] < M[S[n]+i]
+		  localmax = S[n]+i
+          end 
+        end
         end
         dt = copy(dtn)
       end
+      push!(TOnSet, localmax)
+      
+      
+     
 
-      shift=i      
-      dt = (M[S[n]+dstep+shift] - M[S[n]+shift]) / dstep
-
+      
       # Szukanie TOffSet
-      for i = 2:1:limit
-        dtn = (M[Q[n]+i+dstep+shift] - M[TOnSet[n]+i+shift]) / dstep
-        if (dtn * dt) < 0 && dtn < 0
-          TOffSet = push!(TOffSet, S[n]+i+shift)
-          break
-        end
-        dt = copy(dtn)
-      end
+      
+      shift=i
+      if(S[n]+limit+dstep+shift)<N
+            
+      dt = (M[S[n]+dstep+shift] - M[S[n]+shift]) / dstep
+      
+      localmax = S[n]+1+shift
+      for i = 2:1:(2*limit)
+	if(S[n]+i+dstep+shift)<N
+	  dtn = (M[S[n]+i+dstep+shift] - M[TOnSet[n]+i+shift]) / dstep
+	  if (dtn * dt) < 0 && dtn < 0
+	    
+	    if M[localmax] < M[S[n]+i+shift]
+		  localmax = S[n]+i+shift
+          end 
+	  
+	  end
+	  dt = copy(dtn)
+	  end
+	
     end
+      push!(TOffSet, localmax)
+    end
+  
+  end
 
-    QRSOnSet = Q
+    QRSOnSet = R
     QRSOffSet = S
     
     return POnSet, POffSet, QRSOnSet, QRSOffSet, TOffSet
