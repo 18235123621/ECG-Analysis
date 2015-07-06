@@ -1,8 +1,10 @@
 module Waves
+using DSP
+using Wavelets
 
 export ecgPeaks
 
-function ecgPeaks(fceg, R, s = 20, dstep = 3)
+function ecgPeaks(fecg, R, s=20, dstep=3)
 
     # Parametry
 

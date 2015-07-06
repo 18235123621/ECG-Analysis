@@ -13,7 +13,7 @@ end
 sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"rpeaks_execute"), :clicked) do widget
     global signal
     if length(signal.data) > 1
-        R = R_peaks.panTompkins(signal.data)
+        R = R_peaks.panTompkins(signal.data, ECGInput.getfreq(signal))
         println("Wyznaczono peaki R w próbkach nr: $R")
 	ECGInput.setR(signal, R)
         reload_plot()

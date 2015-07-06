@@ -13,6 +13,7 @@ println("#############################################\n")
 # Pkg.add("DSP")
 # Pkg.add("Dierckx")
 # Pkg.add("ApproxFun")
+# Pkg.add("Wavelets")
 
 using Gtk
 using Gtk.ShortNames

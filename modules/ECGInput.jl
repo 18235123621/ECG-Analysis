@@ -5,7 +5,7 @@ module ECGInput
 #More info: http://www.physionet.org/physiotools/wag/intro.htm
 
 
-export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getPonset, getPend, getQRSonset, getQRSend, getR, getRRIntervals, setPonset, setPend, setQRSonset, setQRSend, setR , getTend
+export Signal, loadsignal, opensignal, savesignal, getres, getfreq, getgain, getPonset, getPend, getQRSonset, getQRSend, getR, getRRIntervals, getTend, setPonset, setPend, setQRSonset, setQRSend, setR
 
 type Signal
     record::String
