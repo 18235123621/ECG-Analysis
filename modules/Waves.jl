@@ -4,7 +4,7 @@ using Wavelets
 
 export ecgPeaks
 
-function ecgPeaks(fecg, R, s=20, dstep=3)
+function ecgPeaks(fecg, R, fs, s=20, dstep=3)
 
     # Parametry
 
@@ -12,9 +12,8 @@ function ecgPeaks(fecg, R, s=20, dstep=3)
     #dstep = 3
 
     #Limit wyszukiwania
-    #Limit wyszukiwania
-    fs =360
     limit = 30
+
     QRSlimit = convert(Int64, round(0.11 * fs))
     Plimit = convert(Int64, round(0.11 * fs))
     Tlimit = convert(Int64, round(0.16 * fs))

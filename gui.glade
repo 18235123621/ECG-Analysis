@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkFixed" id="baseline_fixed">
@@ -150,17 +150,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkLabel" id="label8">
+      <object class="GtkLabel" id="wspolczynniki">
         <property name="width_request">100</property>
         <property name="height_request">250</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">TUTAJ POWINNY
-SIĘ ZNALEŹĆ
-WSZYSTKIE
-WSPÓŁCZYNNIKI
-Z ANALIZY
-PO JEJ WYKONANIU</property>
       </object>
       <packing>
         <property name="x">410</property>
@@ -221,17 +215,16 @@ PO JEJ WYKONANIU</property>
     <property name="stock">gtk-save</property>
   </object>
   <object class="GtkWindow" id="mainwindow">
-    <property name="width_request">900</property>
+    <property name="width_request">1000</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Przetwarzanie sygnałów EKG</property>
     <child>
       <object class="GtkFixed" id="window_fixed">
-        <property name="height_request">700</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
           <object class="GtkMenuBar" id="menubar1">
-            <property name="width_request">900</property>
+            <property name="width_request">1000</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">baseline</property>
@@ -325,7 +318,7 @@ PO JEJ WYKONANIU</property>
           </object>
           <packing>
             <property name="x">50</property>
-            <property name="y">390</property>
+            <property name="y">500</property>
           </packing>
         </child>
         <child>
@@ -340,7 +333,7 @@ PO JEJ WYKONANIU</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">500</property>
+            <property name="y">650</property>
           </packing>
         </child>
         <child>
@@ -353,8 +346,8 @@ PO JEJ WYKONANIU</property>
             <property name="xalign">0.43999999761581421</property>
           </object>
           <packing>
-            <property name="x">860</property>
-            <property name="y">500</property>
+            <property name="x">960</property>
+            <property name="y">650</property>
           </packing>
         </child>
         <child>
@@ -387,8 +380,8 @@ PO JEJ WYKONANIU</property>
         </child>
         <child>
           <object class="GtkFixed" id="modules">
-            <property name="width_request">880</property>
-            <property name="height_request">300</property>
+            <property name="width_request">1000</property>
+            <property name="height_request">400</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
@@ -538,6 +531,7 @@ PO JEJ WYKONANIU</property>
         <property name="height_request">29</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="text" translatable="yes">20</property>
       </object>
       <packing>
         <property name="x">266</property>
@@ -550,6 +544,7 @@ PO JEJ WYKONANIU</property>
         <property name="height_request">29</property>
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="text" translatable="yes">3</property>
       </object>
       <packing>
         <property name="x">266</property>

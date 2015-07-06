@@ -1,7 +1,7 @@
 
 println("\n\n#############################################")
 println("#")
-println("# Przetwarzanie sygnałów 2015 wersja 0.2")
+println("# Przetwarzanie sygnałów 2015 wersja 1.0")
 println("#")
 println("#############################################\n")
 
@@ -407,6 +407,7 @@ modules = GAccessor.object(builder_main, "modules")
 window_change_resolution = GAccessor.object(builder_main, "window_change_resolution")
 window_load_params = GAccessor.object(builder_main, "window_load_params")
 wykres = GAccessor.object(builder_main, "wykres")
+wspolczynniki = GAccessor.object(builder_main, "wspolczynniki")
 poincareView = GAccessor.object(builder_main, "poincare")
 dftView = GAccessor.object(builder_main, "dft")
 dfaView = GAccessor.object(builder_main, "dfa")

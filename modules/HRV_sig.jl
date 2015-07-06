@@ -7,6 +7,7 @@ sig_hrv1_execute = signal_connect(GAccessor.object(builder_main,"hrv1_execute"),
             frequency = HRV.FrequencyAnalysis(RRint)
             reload_poincare_plot(poincare)
             reload_dft_plot(frequency.WidmoX, frequency.WidmoY)
+            setproperty!(wspolczynniki, :label, "TP: $(frequency.TP)\nHF: $(frequency.HF)\nLF: $(frequency.LF)\nVLF: $(frequency.VLF)\nULF: $(frequency.ULF)\nLFLH: $(frequency.LFLH)\n")
             hrvDone = true
         else
             error_dialog("ERROR: RR intervals are empty!")
