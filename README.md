@@ -1,4 +1,4 @@
-﻿ECG Signal Analysis in Julia
+ECG Signal Analysis in Julia
 ============================
 
 Analysis of an ECG signal loaded from PhysioBank (using WFDB) or a CSV file:
@@ -11,6 +11,8 @@ Analysis of an ECG signal loaded from PhysioBank (using WFDB) or a CSV file:
 6. Poincare plot
 
 Project is developed in Julia language with plots in PyPlot and GUI in Gtk.jl.
+
+Requirements: Julia, GTK+, Matplotlib, PyPlot, WFDB.
 
 University: AGH University of Science in Kraków, Poland
 
