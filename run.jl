@@ -7,34 +7,37 @@ println("#############################################\n")
 
 # ŁADOWANIE BIBLIOTEK
 
-# Pkg.add("Gtk")
-# Pkg.add("PyCall")
-# Pkg.add("PyPlot")
-# Pkg.add("DSP")
-# Pkg.add("Dierckx")
-# Pkg.add("ApproxFun")
-# Pkg.add("Wavelets")
+Pkg.add("Gtk")
+Pkg.add("PyCall")
+Pkg.add("PyPlot")
+Pkg.add("DSP")
+Pkg.add("Dierckx")
+Pkg.add("ApproxFun")
+Pkg.add("Wavelets")
 
 using Gtk
 using Gtk.ShortNames
-using PyPlot # http://matplotlib.org/api/pyplot_summary.html
+using PyPlot
 
 pygui(false)
 
 # ŁADOWANIE MODUŁÓW DO PRZETWARZANIA SYGNAŁU
 # Konwencja: moduły zaczynamy z wielkiej litery, jak klasy
+
 reload("modules/ECGInput.jl")
 reload("modules/Baseline.jl")
 reload("modules/R_peaks.jl")
 reload("modules/Waves.jl")
 reload("modules/HRV.jl")
 reload("modules/HRV_DFA.jl")
+
 using ECGInput
 using Baseline
 using R_peaks
 using Waves
 using HRV
 using HRV_DFA
+
 # INICJALIZACJA PODSTAWOWYCH ZMIENNYCH GLOBALNYCH
 
 current_page = 0
@@ -43,39 +46,30 @@ signal = Signal()
 hrvDone = false
 dfaDone = false
 
-
 # PODSTAWOWE FUNKCJE - CORE
 
 function reload_plot()
     global wykres, signal, current_page, items_per_page, current_page
-
     data = signal.data
     datalength = length(data)
-
     if datalength == 0
         data = [0.0]
         datalength = 1
     end
-
     if current_page < 0
         current_page = 0
     end
-
     if datalength > 1
        freq = getfreq(signal)
     else
        freq =1
     end
-
     figure(1, figsize=[9, 3], dpi=100, facecolor="#f2f1f0")
-
     xstart = current_page * items_per_page
     xend = xstart + items_per_page 
-
     if xstart == 0
         xstart = 1
     end
-
     if xstart > datalength
         page = floor(datalength / items_per_page)
         xstart = current_page * items_per_page
@@ -86,7 +80,6 @@ function reload_plot()
     elseif xend > datalength
         xend = datalength
     end
-
     x = collect(xstart/freq:(1/freq):xend/freq)
     legendData = ["Sygnal"]
     plt.hold(true)
@@ -95,18 +88,12 @@ function reload_plot()
     useSimpleMode = true
     #WAŻNE - OBSŁUGA MODUŁÓW
     handle_R(freq, x[1], x[length(x)])
-
     handle_QRS(freq, x[1], x[length(x)], minimum(data[xstart:xend]) - 0.04*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend]))), useSimpleMode)
-
     handle_P(freq, x[1], x[length(x)], minimum(data[xstart:xend]) - 0.04*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend]))), useSimpleMode)
-
     handle_T(freq, x[1], x[length(x)], minimum(data[xstart:xend]) - 0.04*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend]))), useSimpleMode)
-
     #WAŻNE - OBSŁUGA MODUŁÓW END
-
     yMaxAxis = maximum(data[xstart:xend]) + 0.03*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend])))
     yMinAxis = minimum(data[xstart:xend]) - 0.1*max(maximum(data[xstart:xend]), abs(minimum(data[xstart:xend])))
-
     axis([xstart/freq, xend/freq, yMinAxis, yMaxAxis])
     xlabel("time [s]")
     ylabel("voltage [mV]")
@@ -135,8 +122,7 @@ function handle_QRS(freq, xstart, xend, y, simple)
         qrsEnd = filter(val -> (val>xstart && val<xend), ECGInput.getQRSend(signal).*(1/freq))
         onLen = length(qrsOn)
         endLen = length(qrsEnd)
-
-        iModif= onLen < endLen ? 1 : 0
+        iModif = onLen < endLen ? 1 : 0
         labelCalled = false
         iEnd = onLen < endLen ? endLen-1 : onLen
         if onLen == endLen
@@ -146,8 +132,8 @@ function handle_QRS(freq, xstart, xend, y, simple)
         elseif onLen < endLen
             iEnd = onLen
         end
-        for i= 1 : iEnd
-            xQRS = (collect( [qrsOn[i] qrsEnd[i+iModif] ] ))
+        for i = 1:iEnd
+            xQRS = collect([qrsOn[i] qrsEnd[i+iModif]])
             yV = zeros(xQRS)
             fill!(yV, y)
             if i == 1
@@ -157,7 +143,6 @@ function handle_QRS(freq, xstart, xend, y, simple)
                 plt.plot(xQRS, yV, color="green", linewidth=2.0, "b^-")
             end
         end
-       
         #brzegi wykresu
         if length(qrsOn) > length(qrsEnd) && length(qrsOn) > 0
             xQRS = collect([qrsOn[length(qrsOn)] xend])
@@ -170,9 +155,8 @@ function handle_QRS(freq, xstart, xend, y, simple)
                 labelCalled = true
             end
         end
-
         if length(qrsOn) < length(qrsEnd) && length(qrsEnd) > 0
-            xQRS = collect([ xstart qrsEnd[1] ])
+            xQRS = collect([xstart qrsEnd[1]])
             println("xQRS 2 = $xQRS")
             yV = zeros(xQRS)
             fill!(yV, y)
@@ -183,13 +167,12 @@ function handle_QRS(freq, xstart, xend, y, simple)
                 labelCalled = true
             end
         end
-        #brzegi wykresu
         return true
     elseif length(ECGInput.getQRSonset(signal)) > 0  && length(signal.data) > 1 && simple == true
         xOn = filter(val -> (val>xstart && val<xend), ECGInput.getQRSonset(signal).*(1/freq))
         yOn = signal.data[filter(r -> (r>xstart*freq && r<xend*freq), ECGInput.getQRSonset(signal))]
         plot(xOn, yOn, color="green", marker="o", linewidth=0, label="QRS_onset")
-        xOff= filter(val -> (val>xstart && val<xend), ECGInput.getQRSend(signal).*(1/freq))
+        xOff = filter(val -> (val>xstart && val<xend), ECGInput.getQRSend(signal).*(1/freq))
         yOff = signal.data[filter(r -> (r>xstart*freq && r<xend*freq), ECGInput.getQRSend(signal))]
         plot(xOff, yOff, color="#44D6ED", marker="o", linewidth=0, label="QRS_end")
         return true
@@ -222,15 +205,13 @@ function handle_T(freq, xstart, xend, y, simple)
 end
 
 function handle_P(freq, xstart, xend, y, simple)
-    if length(ECGInput.getPonset(signal))>0 && length(ECGInput.getPend(signal))==length(ECGInput.getPonset(signal)) && length(signal.data)>1 && simple == false
+    if length(ECGInput.getPonset(signal)) > 0 && length(ECGInput.getPend(signal)) == length(ECGInput.getPonset(signal)) && length(signal.data) > 1 && simple == false
         pOn = filter(val -> (val>xstart && val<xend), ECGInput.getPonset(signal).*(1/freq))
         pEnd = filter(val -> (val>xstart && val<xend), ECGInput.getPend(signal).*(1/freq))
         onLen = length(pOn)
         endLen = length(pEnd)
         labelCalled = false
-
-        iModif = onLen < endLen ? 1:0
-
+        iModif = onLen < endLen ? 1 : 0
         iEnd = onLen < endLen ? endLen-1 : onLen
         if onLen == endLen
             iEnd = onLen
@@ -239,8 +220,8 @@ function handle_P(freq, xstart, xend, y, simple)
         elseif onLen < endLen
             iEnd = onLen
         end
-        for i= 1 : iEnd
-            xP = (collect( [pOn[i] pEnd[i+iModif] ] ))
+        for i = 1:iEnd
+            xP = collect([pOn[i] pEnd[i+iModif]])
             yV = zeros(xP)
             fill!(yV, y)
             if i == 1
@@ -251,7 +232,7 @@ function handle_P(freq, xstart, xend, y, simple)
             end
         end
         #brzegi wykresu
-        if length(pOn) > length(pEnd) && length(pOn)>0
+        if length(pOn) > length(pEnd) && length(pOn) > 0
             xP = collect([pOn[length(pOn)] xend])
             yV = zeros(xP)
             fill!(yV, y)
@@ -262,8 +243,8 @@ function handle_P(freq, xstart, xend, y, simple)
                 labelCalled = true
             end
         end
-        if length(pOn) < length(pEnd) && length(pEnd)>0
-            xP = collect([ xstart pEnd[1] ])
+        if length(pOn) < length(pEnd) && length(pEnd) > 0
+            xP = collect([xstart pEnd[1]])
             println("xP 2 = $xP")
             yV = zeros(xP)
             fill!(yV, y)
@@ -274,13 +255,12 @@ function handle_P(freq, xstart, xend, y, simple)
                 labelCalled = true
             end
         end
-        #brzegi wykresu
         return true
-    elseif  length(ECGInput.getPonset(signal))>0  && length(signal.data)>1 && simple == true
+    elseif length(ECGInput.getPonset(signal)) > 0  && length(signal.data) > 1 && simple == true
         xOn = filter(val -> (val>xstart && val<xend), ECGInput.getPonset(signal).*(1/freq))
         yOn = signal.data[filter(r -> (r>xstart*freq && r<xend*freq), ECGInput.getPonset(signal))]
         plot(xOn, yOn, color="#99C930", marker="o", linewidth=0, label="P_onset")
-        xOff= filter(val -> (val>xstart && val<xend), ECGInput.getPend(signal).*(1/freq))
+        xOff = filter(val -> (val>xstart && val<xend), ECGInput.getPend(signal).*(1/freq))
         yOff = signal.data[filter(r -> (r>xstart*freq && r<xend*freq), ECGInput.getPend(signal))]
         plot(xOff, yOff, color="yellow", marker="o", linewidth=0, label="P_end")
         return true
@@ -289,6 +269,7 @@ function handle_P(freq, xstart, xend, y, simple)
         return false
     end
 end
+
 function reset_poincare_plot()
     figure(2, figsize=[4, 4], dpi=80, facecolor="#f2f1f0")
     plot([0], [0], color="blue", linewidth=0)
